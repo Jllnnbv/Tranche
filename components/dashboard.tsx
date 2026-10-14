@@ -506,7 +506,7 @@ export function Dashboard() {
 
             {/* Actions */}
             <div className="db-detail-actions">
-              <Link href="/pay" className="db-detail-btn-action">
+              <Link href={`/pay?plan=${encodeURIComponent(selectedPaluwagan.id)}`} className="db-detail-btn-action">
                 Make Contribution
               </Link>
               <button

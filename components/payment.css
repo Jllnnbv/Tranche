@@ -283,3 +283,4 @@
 .pay-receipt-heading > div { display: flex; flex-direction: column; gap: 3px; }
 .pay-receipt-label { font-weight: 600; font-size: 11px; line-height: 13px; letter-spacing: 0.04em; color: #6B7280; }
 .pay-receipt-total { font-weight: 700; font-size: 30px; line-height: 36px; color: #176B45; }
+.pay-plan-note { margin: 0; font-size: 11px; line-height: 13px; font-weight: 600; color: #4C5D36; }

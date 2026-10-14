@@ -39,6 +39,9 @@ type Contribution = {
   error?: { code: string; message: string };
   explorerUrl?: string;
 };
+// A plan made with Create Paluwagan (saved in this browser by the dashboard).
+type Plan = { id: string; purpose?: string; goal?: string; frequency?: string };
+
 type Envelope = { address: string; round: number; txHash: string; signedXdr: string };
 type View = "review" | "processing" | "success" | "pending" | "failed" | "receipt";
 type Phase = "preparing" | "signing" | "submitting";
@@ -98,6 +101,7 @@ function errorText(error: unknown) {
 export function Payment() {
   const [group, setGroup] = useState<Group | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
   const [address, setAddress] = useState("");
   const [view, setView] = useState<View>("review");
   const [phase, setPhase] = useState<Phase>("preparing");
@@ -118,11 +122,24 @@ export function Payment() {
     }
   }, []);
 
+  // /pay?plan=<id> presents that plan; the payment itself still uses the live group.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("plan");
+    if (!id) return;
+    try {
+      const plans = JSON.parse(localStorage.getItem("tranche_paluwagans") ?? "[]") as Plan[];
+      setPlan(plans.find((p) => p.id === id) ?? null);
+    } catch {
+      // No saved plans in this browser: show the live group.
+    }
+  }, []);
+
   useEffect(() => {
     void loadGroup();
     refreshWallet().then((a) => a && setAddress(a), () => undefined);
   }, [loadGroup]);
 
+  const groupName = plan?.purpose?.trim() || group?.name;
   const me = group?.members.find((m) => m.publicKey && m.publicKey === address) ?? null;
   const round =
     group?.rounds.find((r) => r.index === group.activeRound) ?? group?.rounds[group.rounds.length - 1] ?? null;
@@ -318,7 +335,7 @@ export function Payment() {
     const lines = [
       "TRANCHE — PAYMENT RECEIPT",
       "",
-      `Group:            ${group.name}`,
+      `Group:            ${groupName}`,
       `Member:           ${me?.displayName ?? address}`,
       `Round:            ${contribution.round}`,
       `Receiver:         ${receiver?.displayName ?? "—"}`,
@@ -401,7 +418,7 @@ export function Payment() {
 
           <div className="pay-group-heading">
             <span className="pay-overline">PALUWAGAN GROUP</span>
-            <h1 className="pay-group-name">{group?.name ?? "Loading…"}</h1>
+            <h1 className="pay-group-name">{groupName ?? "Loading…"}</h1>
             {round && (
               <div className="pay-badges">
                 <span className="pay-badge">
@@ -412,6 +429,7 @@ export function Payment() {
                 </span>
               </div>
             )}
+            {plan && planGoal(plan) && <p className="pay-plan-note">{planGoal(plan)}</p>}
           </div>
 
           <div className="pay-divider" style={{ top: 158 }} />
@@ -505,7 +523,7 @@ export function Payment() {
 
             {view === "review" && group && round && (
               <>
-                <ContributionSummary group={group} round={round} amount={amount} receiverName={receiver?.displayName} />
+                <ContributionSummary name={groupName ?? group.name} round={round} amount={amount} receiverName={receiver?.displayName} />
                 <div className="pay-method">
                   <div className="pay-method-info">
                     <span>Payment method</span>
@@ -553,7 +571,7 @@ export function Payment() {
 
             {view === "processing" && group && round && (
               <>
-                <ContributionSummary group={group} round={round} amount={amount} receiverName={receiver?.displayName} />
+                <ContributionSummary name={groupName ?? group.name} round={round} amount={amount} receiverName={receiver?.displayName} />
                 <div className="pay-processing">
                   <div className="pay-spinner">
                     <span className="pay-spinner-track" />
@@ -654,7 +672,7 @@ export function Payment() {
                   <span className="pay-badge">{contribution.status === "SUCCESS" ? "Paid · Confirmed" : contribution.status}</span>
                 </div>
                 <Details>
-                  <Row label="Group" value={group.name} />
+                  <Row label="Group" value={groupName ?? group.name} />
                   <Row label="Member" value={me?.displayName ?? short(contribution.memberId ?? address)} />
                   <Row label="Round" value={`Round ${contribution.round}`} />
                   <Row label="Date" value={when(contribution.updatedAt ?? contribution.createdAt)} />
@@ -747,6 +765,13 @@ export function Payment() {
   );
 }
 
+// "Goal ₱1,500,000 · Weekly" for a plan, from its saved goal text.
+function planGoal(plan: Plan) {
+  const [whole, cents] = (plan.goal ?? "").split(".");
+  const goal = whole && /^\d+$/.test(whole) ? `Goal ₱${BigInt(whole).toLocaleString("en-US")}${cents ? `.${cents}` : ""}` : "";
+  return [goal, plan.frequency].filter(Boolean).join(" · ");
+}
+
 const statusLabel: Record<MemberStatus, string> = { paid: "Paid", pending: "Pending", due: "Due", late: "Late" };
 
 const titles: Record<View, string> = {
@@ -786,14 +811,14 @@ const phaseText: Record<Phase, { title: string; lead: string; badge: string; des
   },
 };
 
-function ContributionSummary({ group, round, amount, receiverName }: { group: Group; round: Round; amount: string; receiverName?: string }) {
+function ContributionSummary({ name, round, amount, receiverName }: { name: string; round: Round; amount: string; receiverName?: string }) {
   return (
     <div className="pay-summary">
       <span className="pay-group-symbol">
         <Icon name="users" size={18} />
       </span>
       <div className="pay-summary-details">
-        <strong>{group.name}</strong>
+        <strong>{name}</strong>
         <span>
           Round {round.index} · to {receiverName ?? "receiver"} · due {when(round.deadline).replace(/, \d{4}/, "")}
         </span>
