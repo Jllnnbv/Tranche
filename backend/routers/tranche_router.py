@@ -1,9 +1,12 @@
+import json
+from pathlib import Path
 from fastapi import APIRouter, Request, Query
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 import time
 from stellar_sdk import Network, StrKey
-from backend.config import TRANCHE_VAULT_ACCOUNT, TRANCHE_FUND_ACCOUNT
+from backend.config import TRANCHE_VAULT_ACCOUNT, TRANCHE_FUND_ACCOUNT, BASE_DIR
+from backend.services.auth_service import read_session_token, SESSION_COOKIE
 from backend.services.paiflow_service import (
     require_integration,
     public_config,
@@ -314,4 +317,59 @@ async def post_contract_signature(req: ContractSignatureRequest):
 async def delete_contract_signatures(groupId: str = Query("tranche-demo")):
     res = reset_signatures(groupId)
     return {"data": res}
+
+# --- User-scoped Ambagans Persistence ---
+USER_AMBAGANS_FILE = BASE_DIR / "data" / "user_ambagans.json"
+
+def _load_user_ambagans() -> Dict[str, List[Dict[str, Any]]]:
+    if not USER_AMBAGANS_FILE.exists():
+        return {}
+    try:
+        return json.loads(USER_AMBAGANS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+def _save_user_ambagans(data: Dict[str, List[Dict[str, Any]]]) -> None:
+    USER_AMBAGANS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = USER_AMBAGANS_FILE.with_suffix(f".{time.time()}.tmp")
+    tmp_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    tmp_path.replace(USER_AMBAGANS_FILE)
+
+@router.get("/user/ambagans")
+async def get_user_ambagans(request: Request):
+    token = request.cookies.get(SESSION_COOKIE)
+    user_id = read_session_token(token)
+    if not user_id:
+        return {"data": []}
+    all_data = _load_user_ambagans()
+    return {"data": all_data.get(user_id, [])}
+
+@router.post("/user/ambagans")
+async def save_user_ambagan(request: Request):
+    token = request.cookies.get(SESSION_COOKIE)
+    user_id = read_session_token(token)
+    if not user_id:
+        raise PaiflowError(401, "UNAUTHORIZED", "Sign in required to save an ambagan.")
+    payload = await request.json()
+    all_data = _load_user_ambagans()
+    user_list = all_data.get(user_id, [])
+    item_id = payload.get("id")
+    user_list = [item for item in user_list if item.get("id") != item_id]
+    user_list.insert(0, payload)
+    all_data[user_id] = user_list
+    _save_user_ambagans(all_data)
+    return {"data": payload}
+
+@router.delete("/user/ambagans/{id}")
+async def delete_user_ambagan(id: str, request: Request):
+    token = request.cookies.get(SESSION_COOKIE)
+    user_id = read_session_token(token)
+    if not user_id:
+        raise PaiflowError(401, "UNAUTHORIZED", "Sign in required.")
+    all_data = _load_user_ambagans()
+    user_list = all_data.get(user_id, [])
+    all_data[user_id] = [item for item in user_list if item.get("id") != id]
+    _save_user_ambagans(all_data)
+    return {"data": {"deleted": True}}
+
 

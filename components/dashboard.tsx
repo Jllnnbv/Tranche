@@ -131,11 +131,12 @@ export function Dashboard() {
   const [activePlanForDashboard, setActivePlanForDashboard] = useState<AmbaganItem | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "wallet" | "create" | "user">("home");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [ambagans, setAmbagans] = useState<AmbaganItem[]>(DEFAULT_AMBAGANS);
+  const [ambagans, setAmbagans] = useState<AmbaganItem[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedAmbagan, setSelectedAmbagan] = useState<AmbaganItem | null>(null);
   const [isNavigatingContract, setIsNavigatingContract] = useState(false);
   const router = useRouter();
-  const [userName, setUserName] = useState("Villaluna Jomari");
+  const [userName, setUserName] = useState("User");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const navigateToContract = (url: string) => {
@@ -181,13 +182,49 @@ export function Dashboard() {
 
     const hasCustomProfile = loadProfile();
 
-    browserRequest<{ username: string; email: string }>("/api/auth/me").then(
-      (user) => {
+    browserRequest<{ id?: string; username: string; email: string }>("/api/auth/me").then(
+      async (user) => {
         if (!mounted) return;
+        const uid = user.id || user.email || user.username || "default_user";
+        setCurrentUserId(uid);
         if (!hasCustomProfile) {
           const dn = displayName(user);
           if (dn) setUserName(dn);
         }
+
+        // Load ambagans belonging specifically to this user session
+        let list: AmbaganItem[] = [];
+        try {
+          const res = await browserRequest<{ data: AmbaganItem[] }>("/api/tranche/user/ambagans");
+          if (res && Array.isArray(res.data)) {
+            list = res.data;
+          }
+        } catch {
+          // Fallback to user-scoped localStorage
+          try {
+            const saved = localStorage.getItem(`ambagan_groups_${uid}`);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed)) list = parsed;
+            }
+          } catch {}
+        }
+
+        // Never inject hardcoded demo plans into personal sessions
+        const personalOnly = list.filter(
+          (item) =>
+            item.id !== "school-project" &&
+            item.id !== "antipolo-trip" &&
+            item.id !== "pal-default" &&
+            item.id !== "amb-default"
+        );
+
+        setAmbagans(personalOnly);
+        try {
+          localStorage.setItem(`ambagan_groups_${uid}`, JSON.stringify(personalOnly));
+          localStorage.setItem("ambagan_groups", JSON.stringify(personalOnly));
+          localStorage.setItem("tranche_paluwagans", JSON.stringify(personalOnly));
+        } catch {}
       },
       () => {
         if (mounted) router.replace("/login");
@@ -217,35 +254,13 @@ export function Dashboard() {
     }
   }
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("ambagan_groups") ?? localStorage.getItem("tranche_paluwagans");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const filtered = parsed.filter((item: AmbaganItem) => item.id !== "pal-default" && item.id !== "amb-default");
-          const hasSchool = filtered.some((item) => item.id === "school-project" || item.purpose?.toLowerCase().includes("school"));
-          const list = hasSchool ? filtered : [DEFAULT_SCHOOL_PROJECT, ...filtered];
-          setAmbagans(list.length > 0 ? list : DEFAULT_AMBAGANS);
-          return;
-        }
-      }
-      setAmbagans(DEFAULT_AMBAGANS);
-    } catch {
-      setAmbagans(DEFAULT_AMBAGANS);
-    }
-  }, []);
-
   // Check URL query parameters for openPlan/plan (e.g., returning from /pay)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const openId = params.get("openPlan") || params.get("group") || params.get("plan");
     if (openId) {
-      const found =
-        ambagans.find((p) => p.id === openId) ||
-        (openId === "school-project" ? DEFAULT_SCHOOL_PROJECT : null) ||
-        (openId === "antipolo-trip" ? DEFAULT_ANTIPOLO : null);
+      const found = ambagans.find((p) => p.id === openId);
       if (found) {
         setActivePlanForDashboard(found);
       }
@@ -264,7 +279,7 @@ export function Dashboard() {
       perPayment: data.perPayment,
       recipients: data.recipients,
       signature: data.signature,
-      hasProgress: false, // New plans start with 0 paid (first member unpaid)
+      hasProgress: false,
       createdAt: new Date().toISOString(),
     };
 
@@ -294,28 +309,34 @@ export function Dashboard() {
       }
     } catch {}
 
-    setAmbagans((prev) => {
-      const updated = [newItem, ...prev];
-      try {
-        localStorage.setItem("ambagan_groups", JSON.stringify(updated));
-        localStorage.setItem("tranche_paluwagans", JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
+    const updated = [newItem, ...ambagans];
+    setAmbagans(updated);
+
+    try {
+      const uid = currentUserId || "current";
+      localStorage.setItem(`ambagan_groups_${uid}`, JSON.stringify(updated));
+      localStorage.setItem("ambagan_groups", JSON.stringify(updated));
+      localStorage.setItem("tranche_paluwagans", JSON.stringify(updated));
+    } catch {}
+
+    // Persist to backend
+    browserRequest("/api/tranche/user/ambagans", newItem).catch(() => {});
 
     setIsCreateModalOpen(false);
     navigateToContract(`/contract?plan=${encodeURIComponent(newItem.id)}`);
   };
 
   const handleDeleteAmbagan = (id: string) => {
-    setAmbagans((prev) => {
-      const updated = prev.filter((item) => item.id !== id);
-      try {
-        localStorage.setItem("ambagan_groups", JSON.stringify(updated));
-        localStorage.setItem("tranche_paluwagans", JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
+    const updated = ambagans.filter((item) => item.id !== id);
+    setAmbagans(updated);
+    try {
+      const uid = currentUserId || "current";
+      localStorage.setItem(`ambagan_groups_${uid}`, JSON.stringify(updated));
+      localStorage.setItem("ambagan_groups", JSON.stringify(updated));
+      localStorage.setItem("tranche_paluwagans", JSON.stringify(updated));
+    } catch {}
+
+    fetch(`/api/tranche/user/ambagans/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
     setSelectedAmbagan(null);
   };
 
@@ -454,7 +475,11 @@ export function Dashboard() {
                 <span>Profile</span>
               </span>
             </div>
-            <p className="db-greeting-sub">Select a purpose card below to view its live rotating savings dashboard.</p>
+            <p className="db-greeting-sub">
+              {ambagans.length === 0
+                ? "You don't have any Ambagan groups yet. Click '+ Create Ambagan' to get started!"
+                : "Select a purpose card below to view its live rotating savings dashboard."}
+            </p>
           </div>
 
           <div className="db-header-controls">
@@ -509,6 +534,57 @@ export function Dashboard() {
 
         {/* Purpose Cards Container */}
         <div className="db-cards-container">
+          {ambagans.length === 0 && (
+            <div
+              className="db-card-empty-prompt"
+              role="button"
+              tabIndex={0}
+              onClick={() => setIsCreateModalOpen(true)}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setIsCreateModalOpen(true)}
+              style={{
+                width: "280px",
+                height: "269px",
+                borderRadius: "18px",
+                border: "2px dashed #A3C9A8",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "24px",
+                textAlign: "center",
+                cursor: "pointer",
+                background: "rgba(255, 255, 255, 0.55)",
+                backdropFilter: "blur(4px)",
+                transition: "all 0.2s ease",
+                boxSizing: "border-box",
+              }}
+            >
+              <div
+                style={{
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "50%",
+                  background: "#B54880",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "16px",
+                  boxShadow: "0 4px 12px rgba(181, 72, 128, 0.3)",
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+                  <path d="M15 6v18M6 15h18" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              </div>
+              <h4 style={{ margin: "0 0 8px", fontSize: "16px", fontWeight: 600, color: "#0E241C" }}>
+                No Ambagan Yet
+              </h4>
+              <p style={{ margin: 0, fontSize: "13px", color: "#4A6B5B", lineHeight: 1.4 }}>
+                Click here or the button above to start your circle's savings plan.
+              </p>
+            </div>
+          )}
+
           {ambagans.map((p) => {
             const displayTitle = p.purpose?.startsWith("<<") ? "" : (p.purpose ?? "");
             const displayStart = p.start ? `Started: ${formatCardDate(p.start)}` : "";
