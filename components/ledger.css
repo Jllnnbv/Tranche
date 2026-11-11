@@ -312,6 +312,7 @@
 }
 
 .lgr-date-inputs-row {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -377,6 +378,11 @@
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
   border: 1px solid #E6E8ED;
   padding: 12px;
+}
+
+.lgr-cal-popover.is-deadline {
+  left: auto;
+  right: 0;
 }
 
 .lgr-cal-header {

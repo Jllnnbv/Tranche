@@ -96,6 +96,7 @@ export function validateGroup(raw: unknown): Group {
 
 export function getGroup(): Group {
   const file =
+    process.env.AMBAGAN_GROUP_FILE ??
     process.env.TRANCHE_GROUP_FILE ??
     path.join(process.cwd(), "config", "group.json");
   let raw: unknown;

@@ -69,7 +69,9 @@ const empty = (): State => ({
   releases: [],
 });
 const file = () =>
-  process.env.TRANCHE_DATA_FILE ?? path.join(process.cwd(), "data", "ledger.json");
+  process.env.AMBAGAN_DATA_FILE ??
+  process.env.TRANCHE_DATA_FILE ??
+  path.join(process.cwd(), "data", "ledger.json");
 
 // Next builds separate route bundles; share one lock across them in this process.
 const processState = globalThis as typeof globalThis & {
@@ -82,7 +84,7 @@ async function load(): Promise<State> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return empty();
     // Fail closed: never overwrite a ledger we could not parse.
-    throw new Error("Tranche ledger file is unreadable.");
+    throw new Error("Ambagan ledger file is unreadable.");
   }
 }
 async function save(state: State) {

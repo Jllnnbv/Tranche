@@ -1,6 +1,6 @@
-# Handoff: Tranche backend, remaining work
+# Handoff: Ambagan backend, remaining work
 
-You are continuing the backend of **Tranche**, a paluwagan (rotating savings) app built on the Paiflow hackathon starter (Next.js 15, Stellar **testnet only**). Work on branch `tranche-backend` in `paiflow-hackathon-starter/`.
+You are continuing the backend of **Ambagan**, an ambagan (rotating savings) app built on the Paiflow hackathon starter (Next.js 15, Stellar **testnet only**). Work on branch `tranche-backend` in `paiflow-hackathon-starter/`.
 
 ## Read first
 1. `AGENTS.md`: the starter rules plus the "Tranche backend" and "Tranche status and open work" sections.

@@ -1,8 +1,17 @@
 node_modules/
+**/node_modules/
 .next/
 .env*
 !.env.example
 *.tsbuildinfo
+.DS_Store
+*/.DS_Store
+*/**/.DS_Store
+video/node_modules/
+video/.raw-recordings/
+video/out/
+__pycache__/
+*.pyc
 
 # Tranche local ledger (payment records and signed envelopes)
 data/

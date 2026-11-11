@@ -21,10 +21,10 @@ async function screen() {
   const { default: Page } = await import("@/app/page");
   return renderToStaticMarkup(Page());
 }
-it.each(["team", "prepare", "demo", "invalid"])("home page shows the Tranche hero without the starter checkout (%s)", async mode => {
+it.each(["team", "prepare", "demo", "invalid"])("home page shows the Ambagan hero without the starter checkout (%s)", async mode => {
   vi.stubEnv("PAIFLOW_MODE", mode);
   const html = await screen();
-  expect(html).toContain("Tranche");
+  expect(html).toContain("Ambagan");
   expect(html).not.toContain("<h2>Pay</h2>");
   expect(html).not.toContain("Live feed");
   expect(html).not.toContain(token);

@@ -228,6 +228,9 @@ export function LedgerModal({
   const [signature, setSignature] = useState("");
   const [signaturePhoto, setSignaturePhoto] = useState<string | null>(null);
   const [padOpen, setPadOpen] = useState(false);
+  const [pendingSig, setPendingSig] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Custom calendar state
@@ -318,21 +321,31 @@ export function LedgerModal({
         role="dialog"
         aria-modal="true"
         aria-label="Add ledger"
+        ref={formRef}
         onClick={(e) => e.stopPropagation()}
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          if (!start) {
-            openCalendar("start");
-            return;
-          }
-          if (!deadline) {
-            openCalendar("deadline");
+          const finalSig = signature || pendingSig;
+          const errs: Record<string, string> = {};
+          if (!purpose.trim()) errs.purpose = "Please enter a purpose.";
+          if (toCentavos(goal) === null || toCentavos(goal) === 0n) errs.goal = "Enter a goal amount in pesos, e.g. 1500000.";
+          if (!filled.length) errs.recipients = "Add at least one recipient email.";
+          if (!start) errs.start = "Pick a start date.";
+          if (!deadline) errs.deadline = "Pick a deadline date.";
+          else if (start && deadline < start) errs.deadline = "Deadline must be after the start date.";
+          if (!finalSig) errs.signature = "Please add your e-signature.";
+          setErrors(errs);
+          const first = Object.keys(errs)[0];
+          if (first) {
+            formRef.current?.querySelector(`[data-err="${first}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
             return;
           }
           if (!signature) {
-            setPadOpen(true);
-            return;
+            setSignature(finalSig);
+            setSignaturePhoto(finalSig);
           }
+          setPadOpen(false);
           onCreate({
             purpose,
             goal,
@@ -342,7 +355,7 @@ export function LedgerModal({
             frequency: FREQUENCIES.find((f) => f.value === frequency)!.label,
             payments: schedule.length,
             perPayment: samePerPayment ?? "",
-            signature,
+            signature: finalSig,
           });
         }}
       >
@@ -567,6 +580,116 @@ export function LedgerModal({
                   <path d="M3 9h18M6 2v3M10 2v3M14 2v3M18 2v3M7 13h10M7 17h6" />
                 </svg>
               </div>
+
+              {/* Custom 2026 Calendar Popover (Figma Spec) - Anchored directly under the clicked date field */}
+              {calTarget && (
+                <div
+                  className={`lgr-cal-popover ${calTarget === "deadline" ? "is-deadline" : "is-start"}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="lgr-cal-header">
+                    <span className="lgr-cal-title">
+                      {calYear}-{String(calMonth + 1).padStart(2, "0")} ({MONTH_NAMES[calMonth]})
+                    </span>
+                    <div className="lgr-cal-navs">
+                      <button
+                        type="button"
+                        className="lgr-cal-nav-btn"
+                        onClick={() => {
+                          if (calMonth === 0) {
+                            setCalMonth(11);
+                            setCalYear((y) => y - 1);
+                          } else {
+                            setCalMonth((m) => m - 1);
+                          }
+                        }}
+                        aria-label="Previous month"
+                      >
+                        &#x2039;
+                      </button>
+                      <button
+                        type="button"
+                        className="lgr-cal-nav-btn"
+                        onClick={() => {
+                          if (calMonth === 11) {
+                            setCalMonth(0);
+                            setCalYear((y) => y + 1);
+                          } else {
+                            setCalMonth((m) => m + 1);
+                          }
+                        }}
+                        aria-label="Next month"
+                      >
+                        &#x203A;
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Weekdays Row: Mon, Tue, Wed, Thu, Fri, Sat, Sun */}
+                  <div className="lgr-cal-weekdays">
+                    <span className="lgr-cal-weekday">Mon</span>
+                    <span className="lgr-cal-weekday">Tue</span>
+                    <span className="lgr-cal-weekday">Wed</span>
+                    <span className="lgr-cal-weekday">Thu</span>
+                    <span className="lgr-cal-weekday">Fri</span>
+                    <span className="lgr-cal-weekday is-weekend">Sat</span>
+                    <span className="lgr-cal-weekday is-weekend">Sun</span>
+                  </div>
+
+                  {/* Cell Divider Line */}
+                  <div className="lgr-cal-divider" />
+
+                  {/* Day Cells Matrix */}
+                  <div className="lgr-cal-days">
+                    {getCalendarDays(calYear, calMonth).map((d) => {
+                      const isStart = d.iso === start;
+                      const isDeadline = d.iso === deadline;
+                      const isSelected = isStart || isDeadline;
+                      const isInRange = start && deadline && d.iso > start && d.iso < deadline;
+
+                      return (
+                        <button
+                          key={d.iso}
+                          type="button"
+                          className={`lgr-cal-day ${d.isWeekend ? "is-weekend" : ""} ${
+                            !d.isCurrentMonth ? "is-other-month" : ""
+                          } ${isSelected ? "is-selected" : ""} ${isInRange ? "is-in-range" : ""}`}
+                          onClick={() => {
+                            if (calTarget === "start") {
+                              setStart(d.iso);
+                              if (deadline && d.iso > deadline) {
+                                setDeadline(d.iso);
+                              }
+                              setCalTarget("deadline");
+                            } else {
+                              if (start && d.iso < start) {
+                                setStart(d.iso);
+                              }
+                              setDeadline(d.iso);
+                              setCalTarget(null);
+                            }
+                          }}
+                        >
+                          {d.day}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="lgr-cal-footer">
+                    <span className="lgr-cal-status">
+                      Picking: <b>{calTarget === "start" ? "Start Date" : "Deadline Date"}</b>
+                    </span>
+                    <button
+                      type="button"
+                      className="lgr-cal-close-btn"
+                      onClick={() => setCalTarget(null)}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="lgr-freq-row">
@@ -606,113 +729,6 @@ export function LedgerModal({
                 </p>
               )}
             </div>
-
-            {/* Custom 2026 Calendar Popover (Figma Spec) */}
-            {calTarget && (
-              <div className="lgr-cal-popover" onClick={(e) => e.stopPropagation()}>
-                <div className="lgr-cal-header">
-                  <span className="lgr-cal-title">
-                    {calYear}-{String(calMonth + 1).padStart(2, "0")} ({MONTH_NAMES[calMonth]})
-                  </span>
-                  <div className="lgr-cal-navs">
-                    <button
-                      type="button"
-                      className="lgr-cal-nav-btn"
-                      onClick={() => {
-                        if (calMonth === 0) {
-                          setCalMonth(11);
-                          setCalYear((y) => y - 1);
-                        } else {
-                          setCalMonth((m) => m - 1);
-                        }
-                      }}
-                      aria-label="Previous month"
-                    >
-                      &#x2039;
-                    </button>
-                    <button
-                      type="button"
-                      className="lgr-cal-nav-btn"
-                      onClick={() => {
-                        if (calMonth === 11) {
-                          setCalMonth(0);
-                          setCalYear((y) => y + 1);
-                        } else {
-                          setCalMonth((m) => m + 1);
-                        }
-                      }}
-                      aria-label="Next month"
-                    >
-                      &#x203A;
-                    </button>
-                  </div>
-                </div>
-
-                {/* Weekdays Row: Mon, Tue, Wed, Thu, Fri, Sat, Sun */}
-                <div className="lgr-cal-weekdays">
-                  <span className="lgr-cal-weekday">Mon</span>
-                  <span className="lgr-cal-weekday">Tue</span>
-                  <span className="lgr-cal-weekday">Wed</span>
-                  <span className="lgr-cal-weekday">Thu</span>
-                  <span className="lgr-cal-weekday">Fri</span>
-                  <span className="lgr-cal-weekday is-weekend">Sat</span>
-                  <span className="lgr-cal-weekday is-weekend">Sun</span>
-                </div>
-
-                {/* Cell Divider Line */}
-                <div className="lgr-cal-divider" />
-
-                {/* Day Cells Matrix */}
-                <div className="lgr-cal-days">
-                  {getCalendarDays(calYear, calMonth).map((d) => {
-                    const isStart = d.iso === start;
-                    const isDeadline = d.iso === deadline;
-                    const isSelected = isStart || isDeadline;
-                    const isInRange = start && deadline && d.iso > start && d.iso < deadline;
-
-                    return (
-                      <button
-                        key={d.iso}
-                        type="button"
-                        className={`lgr-cal-day ${d.isWeekend ? "is-weekend" : ""} ${
-                          !d.isCurrentMonth ? "is-other-month" : ""
-                        } ${isSelected ? "is-selected" : ""} ${isInRange ? "is-in-range" : ""}`}
-                        onClick={() => {
-                          if (calTarget === "start") {
-                            setStart(d.iso);
-                            if (deadline && d.iso > deadline) {
-                              setDeadline(d.iso);
-                            }
-                            setCalTarget("deadline");
-                          } else {
-                            if (start && d.iso < start) {
-                              setStart(d.iso);
-                            }
-                            setDeadline(d.iso);
-                            setCalTarget(null);
-                          }
-                        }}
-                      >
-                        {d.day}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="lgr-cal-footer">
-                  <span className="lgr-cal-status">
-                    Picking: <b>{calTarget === "start" ? "Start Date" : "Deadline Date"}</b>
-                  </span>
-                  <button
-                    type="button"
-                    className="lgr-cal-close-btn"
-                    onClick={() => setCalTarget(null)}
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* SECTION: Contract Signature (Below Contract Date) */}
@@ -791,10 +807,23 @@ export function LedgerModal({
                   setPadOpen(false);
                   fileInputRef.current?.click();
                 }}
+                onDraw={setPendingSig}
                 onCancel={() => setPadOpen(false)}
               />
             )}
           </div>
+
+          {Object.keys(errors).length > 0 && (
+            <div
+              role="alert"
+              data-err={Object.keys(errors)[0]}
+              style={{ color: "#B42318", background: "#FEF3F2", border: "1px solid #FDA29B", borderRadius: 12, padding: "10px 14px", fontSize: 14, margin: "8px 0" }}
+            >
+              {Object.values(errors).map((m) => (
+                <div key={m}>• {m}</div>
+              ))}
+            </div>
+          )}
 
           {/* FOOTER: Summary Bar & Save Button */}
           <div className="lgr-footer-row">

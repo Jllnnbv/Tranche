@@ -1,0 +1,802 @@
+/* ==========================================================================
+   Profile Settings Styles (Matching Ambagan Pixel-Accurate Design)
+   ========================================================================== */
+
+.ps-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, #E1EDA0 0%, #FFFFFF 100%);
+  padding: 32px 24px 64px 24px;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0E241C;
+  overflow-x: hidden;
+}
+
+/* Ambient gradient background */
+.ps-ambient-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 10% 15%, rgba(225, 237, 160, 0.45) 0%, transparent 45%),
+              radial-gradient(circle at 90% 10%, rgba(181, 72, 128, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 50% 90%, rgba(23, 107, 69, 0.05) 0%, transparent 60%);
+  z-index: 0;
+}
+
+.ps-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1040px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   Top Brand & Navigation Bar
+   ========================================================================== */
+.ps-brand-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.ps-brand-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #0E241C;
+  transition: opacity 0.15s;
+}
+
+.ps-brand-logo-link:hover {
+  opacity: 0.88;
+}
+
+.ps-brand-logo-glow {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps-brand-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 34px;
+  font-weight: 600;
+  color: #0E241C;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.ps-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #D6E8D0;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #176B45;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+  margin: 0 !important;
+}
+
+.ps-back-btn:hover {
+  background: #FFFFFF;
+  border-color: #176B45;
+  transform: translateX(-2px);
+}
+
+/* ==========================================================================
+   Header Banner Card
+   ========================================================================== */
+.ps-header-banner {
+  width: 100%;
+  background: #EAF4E7;
+  border: 1px solid #D1E5CC;
+  border-radius: 16px;
+  padding: 24px 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+.ps-banner-avatar {
+  width: 68px;
+  height: 68px;
+  min-width: 68px;
+  border-radius: 50%;
+  background: #B54880;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(181, 72, 128, 0.25);
+  overflow: hidden;
+}
+
+.ps-avatar-initial {
+  font-family: 'Inter', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #FFFFFF;
+  user-select: none;
+}
+
+.ps-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ps-banner-divider {
+  width: 1px;
+  height: 52px;
+  background: #C6DFC2;
+  flex-shrink: 0;
+}
+
+.ps-banner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-banner-title {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 38px;
+  font-weight: 700;
+  color: #0E241C;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.ps-banner-sub {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: #4B6358;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Body Grid: Sidebar Nav & Main Card
+   ========================================================================== */
+.ps-body-grid {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+}
+
+/* ==========================================================================
+   Left Navigation Sidebar Card
+   ========================================================================== */
+.ps-nav-card {
+  background: #FFFFFF;
+  border: 1px solid #DFEADB;
+  border-radius: 16px;
+  padding: 10px 0;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ps-nav-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-left: 4px solid transparent;
+  padding: 14px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin: 0 !important;
+  display: block;
+}
+
+.ps-nav-item:hover {
+  background: #F7FAF6;
+  color: #0E241C;
+}
+
+.ps-nav-active {
+  background: #E3F1DF !important;
+  border-left: 4px solid #176B45 !important;
+  color: #0E241C !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   Right Main Content Card
+   ========================================================================== */
+.ps-content-card {
+  background: #FFFFFF;
+  border: 1px solid #DFEADB;
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  min-height: 480px;
+}
+
+/* Top Row (Two columns): Profile Picture & Personal Details */
+.ps-row-top {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+.ps-section-heading {
+  margin: 0 0 14px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Profile Picture Column */
+.ps-pic-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ps-pic-circle {
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  border-radius: 50%;
+  background: #B54880;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(181, 72, 128, 0.25);
+  overflow: hidden;
+}
+
+.ps-pic-initial {
+  font-size: 32px;
+  font-weight: 700;
+  color: #FFFFFF;
+  user-select: none;
+}
+
+.ps-pic-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ps-btn-upload {
+  background: #2D6A4F;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+  margin: 0 !important;
+}
+
+.ps-btn-upload:hover {
+  background: #1B5E3C;
+}
+
+.ps-btn-remove {
+  background: #FFFFFF;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+  border-radius: 7px;
+  padding: 7px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  margin: 0 !important;
+}
+
+.ps-btn-remove:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+/* Personal Details Column */
+.ps-col-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ps-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.ps-field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.ps-input {
+  width: 100%;
+  height: 38px;
+  background: #F9FAFB;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: #111827;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ps-input:focus {
+  background: #FFFFFF;
+  border-color: #176B45;
+  box-shadow: 0 0 0 3px rgba(23, 107, 69, 0.12);
+}
+
+/* ==========================================================================
+   Section Blocks (Mobile Number & Stellar Wallet)
+   ========================================================================== */
+.ps-section-block {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ps-section-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Mobile number container with verified badge */
+.ps-input-with-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 40px;
+  background: #F9FAFB;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.ps-input-with-badge:focus-within {
+  background: #FFFFFF;
+  border-color: #176B45;
+  box-shadow: 0 0 0 3px rgba(23, 107, 69, 0.12);
+}
+
+.ps-input-bare {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: #111827;
+}
+
+.ps-badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6B7280;
+  user-select: none;
+}
+
+/* Stellar Wallet Row */
+.ps-wallet-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.ps-wallet-address-box {
+  flex: 1;
+  height: 42px;
+  background: #F9FAFB;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 4px 6px 4px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.ps-wallet-address-text {
+  font-family: 'Inter', monospace, sans-serif;
+  font-size: 13.5px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.ps-wallet-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ps-btn-disconnect {
+  background: #FFF5F5;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  margin: 0 !important;
+}
+
+.ps-btn-disconnect:hover {
+  background: #FEE2E2;
+}
+
+.ps-btn-connect {
+  background: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  margin: 0 !important;
+}
+
+.ps-btn-connect:hover {
+  background: #D1FAE5;
+}
+
+.ps-btn-copy {
+  background: #FFFFFF;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  margin: 0 !important;
+}
+
+.ps-btn-copy:hover:not(:disabled) {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.ps-btn-copy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Balance Pill */
+.ps-balance-pill {
+  background: linear-gradient(90deg, #D4E8DC 0%, #BEE2C7 100%);
+  border-radius: 8px;
+  height: 42px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #0E241C;
+  box-sizing: border-box;
+}
+
+/* Divider Line */
+.ps-card-divider {
+  border: none;
+  border-top: 1px solid #E5E7EB;
+  margin: 26px 0 20px 0;
+  width: 100%;
+}
+
+/* Bottom Actions */
+.ps-bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ps-btn-save {
+  background: #2D6A4F;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin: 0 !important;
+  box-shadow: 0 2px 4px rgba(45, 106, 79, 0.15);
+}
+
+.ps-btn-save:hover {
+  background: #1B5E3C;
+}
+
+.ps-btn-cancel {
+  background: #FFFFFF;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  margin: 0 !important;
+}
+
+.ps-btn-cancel:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+/* ==========================================================================
+   Secondary Tabs Styling
+   ========================================================================== */
+.ps-tab-secondary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ps-subtab-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.ps-subtab-desc {
+  margin: -6px 0 10px 0;
+  font-size: 13.5px;
+  color: #6B7280;
+}
+
+.ps-wallet-card {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ps-wallet-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ps-network-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0E241C;
+}
+
+.ps-network-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+}
+
+.ps-active-status {
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.ps-wallet-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ps-wallet-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ps-wallet-info-label {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.ps-wallet-info-val {
+  font-size: 13.5px;
+  color: #111827;
+  word-break: break-all;
+}
+
+.ps-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.ps-toggle-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ps-toggle-sub {
+  font-size: 12.5px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+
+.ps-toggle-btn {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: #D1D5DB;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 0 !important;
+  padding: 0;
+}
+
+.ps-toggle-on {
+  background: #176B45;
+}
+
+.ps-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  transition: transform 0.2s ease;
+}
+
+.ps-toggle-on .ps-toggle-knob {
+  transform: translateX(20px);
+}
+
+/* ==========================================================================
+   Toast Notification
+   ========================================================================== */
+.ps-toast-notification {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: #0E241C;
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  z-index: 9999;
+  animation: psToastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes psToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 860px) {
+  .ps-body-grid {
+    grid-template-columns: 1fr;
+  }
+  .ps-row-top {
+    grid-template-columns: 1fr;
+  }
+  .ps-wallet-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ps-header-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ps-banner-divider {
+    display: none;
+  }
+}

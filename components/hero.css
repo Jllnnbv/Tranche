@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
 .lp {
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
   background: linear-gradient(180deg, #e1eda0 0%, #fff 100%);
   color: #0e241c;
 }
@@ -53,14 +56,15 @@
   width: 893px;
   height: auto;
   max-width: 62%;
+  pointer-events: none;
 }
 .lp-nav {
   position: absolute;
   z-index: 3;
   left: 0;
   right: 0;
-  top: 80px;
-  padding: 0 69px 0 48px;
+  top: 64px;
+  padding: 0 56px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -68,7 +72,7 @@
 .lp-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: #0e241c;
   text-decoration: none;
 }
@@ -79,17 +83,40 @@
   overflow: visible;
 }
 .lp-wordmark {
-  font-family: var(--serif), serif;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
   font-weight: 500;
-  font-size: 42px;
-  line-height: 51px;
-  letter-spacing: -0.02em;
+  font-size: 38px;
+  line-height: 46px;
+  letter-spacing: -0.01em;
+}
+.lp-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.lp-nav-link {
+  font-family: var(--chivo), sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: #12291c;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(14, 36, 28, 0.08);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.lp-nav-link:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #176b45;
+  transform: translateY(-1px);
 }
 .lp-nav-cta {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 10px 20px 10px 27px;
+  gap: 6px;
+  padding: 10px 22px 10px 26px;
   border-radius: 42px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
@@ -97,8 +124,8 @@
   text-decoration: none;
   font-family: var(--chivo), sans-serif;
   font-weight: 500;
-  font-size: 17px;
-  letter-spacing: 0.05em;
+  font-size: 16px;
+  letter-spacing: 0.04em;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .lp-nav-cta:hover {
@@ -108,31 +135,38 @@
 .lp-copy {
   position: absolute;
   z-index: 2;
-  left: 64px;
-  top: 277px;
-  width: 640px;
+  left: 56px;
+  top: 280px;
+  width: 620px;
+  max-width: 55vw;
 }
 .lp-kicker {
-  margin: 0;
-  font-family: var(--serif), serif;
-  font-weight: 500;
-  font-size: 67px;
-  line-height: 64px;
-  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.01em;
+  color: #0e241c;
 }
 .lp-title {
-  margin: -4px 0 0;
-  font-family: var(--serif), serif;
+  margin: 0;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
   font-weight: 500;
-  font-size: 97px;
-  line-height: 83px;
+  font-size: 64px;
+  line-height: 60px;
   letter-spacing: -0.02em;
 }
-.lp-title span {
-  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+.lp-title-line {
+  display: block;
+  background: linear-gradient(90deg, #184333 0%, #245b47 45%, #347a61 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 3px 5px rgba(18, 48, 36, 0.22));
 }
 .lp-t1 {
-  background: linear-gradient(90deg, #0e241c 0%, #368a6b 100%);
+  background: linear-gradient(90deg, #184333 0%, #245b47 45%, #347a61 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -147,42 +181,46 @@
   -webkit-text-fill-color: transparent;
 }
 .lp-sub {
-  margin: 44px 0 0;
-  max-width: 544px;
-  font-size: 17px;
-  line-height: 21px;
-  letter-spacing: -0.02em;
+  margin: 24px 0 0;
+  max-width: 480px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: -0.01em;
   color: #44504c;
 }
 .lp-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 40px;
+  gap: 14px;
+  margin-top: 36px;
+  align-items: center;
   flex-wrap: wrap;
 }
 .lp-primary,
 .lp-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-decoration: none;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .lp-primary {
-  padding: 15px 54px;
+  padding: 13px 38px;
   border-radius: 26px;
   background: linear-gradient(90deg, #172f22 0%, #214a2f 100%);
   color: #fff;
-  font-size: 19.5px;
+  font-size: 17px;
+  font-weight: 400;
 }
 .lp-secondary {
-  padding: 11px 37px;
+  padding: 12px 30px;
   border-radius: 59px;
   border: 1px solid #173023;
   color: #172c1f;
-  font-size: 18.8px;
+  font-size: 16.5px;
+  font-weight: 400;
 }
 .lp-primary:hover,
 .lp-secondary:hover {
@@ -192,26 +230,73 @@
 .lp-facts {
   position: absolute;
   z-index: 2;
-  left: 64px;
-  top: 830px;
+  left: 56px;
+  top: 760px;
   display: flex;
-  gap: 56px;
+  align-items: flex-start;
+  gap: 28px;
   margin: 0;
+}
+.lp-facts > div {
+  position: relative;
+}
+.lp-facts > div:not(:last-child) {
+  padding-right: 28px;
+}
+.lp-facts > div:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 6px;
+  bottom: 4px;
+  width: 1px;
+  background: rgba(14, 36, 28, 0.35);
 }
 .lp-facts dt {
-  font-family: var(--serif), serif;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
   font-weight: 500;
-  font-size: 48px;
-  line-height: 60px;
+  font-size: 34px;
+  line-height: 38px;
   letter-spacing: -0.02em;
+  color: #0e241c;
 }
 .lp-facts dd {
-  margin: 0;
-  font-size: 16px;
-  letter-spacing: -0.02em;
+  margin: 2px 0 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 17px;
+  letter-spacing: -0.01em;
   color: #44504c;
 }
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
+  .lp-copy {
+    top: 260px;
+  }
+  .lp-title {
+    font-size: 58px;
+    line-height: 56px;
+  }
+  .lp-kicker {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .lp-facts {
+    gap: 20px;
+  }
+  .lp-facts > div:not(:last-child) {
+    padding-right: 20px;
+  }
+  .lp-facts dt {
+    font-size: 30px;
+    line-height: 34px;
+  }
+  .lp-facts dd {
+    font-size: 12px;
+    line-height: 15px;
+  }
+}
+@media (max-width: 900px) {
   .lp-stage {
     min-height: 0;
     padding: 0 24px 48px;
@@ -237,18 +322,164 @@
     left: 0;
     top: 0;
     width: auto;
+    max-width: 100%;
   }
   .lp-kicker {
-    font-size: 40px;
-    line-height: 40px;
+    font-size: 24px;
+    line-height: 30px;
   }
   .lp-title {
-    font-size: 56px;
-    line-height: 52px;
+    font-size: 46px;
+    line-height: 44px;
   }
   .lp-facts {
     flex-wrap: wrap;
     gap: 24px;
-    margin-top: 32px;
+    margin-top: 36px;
+  }
+}
+
+/* How Ambagan Works Section */
+.lp-how {
+  position: relative;
+  z-index: 2;
+  padding: 96px 32px 120px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, #ffffff 30%, #f6faee 100%);
+  border-top: 1px solid rgba(23, 107, 69, 0.12);
+}
+.lp-how-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lp-how-header {
+  text-align: center;
+  max-width: 740px;
+  margin-bottom: 44px;
+}
+.lp-how-tag {
+  display: inline-block;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #176b45;
+  background: #eaf5e3;
+  border: 1px solid #d4e7cb;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.lp-how-title {
+  margin: 0 0 16px;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
+  font-weight: 500;
+  font-size: 58px;
+  line-height: 62px;
+  letter-spacing: -0.02em;
+  color: #0e241c;
+}
+.lp-how-desc {
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 25px;
+  color: #44504c;
+}
+.lp-how-visual-frame {
+  width: 100%;
+  max-width: 1040px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(14, 36, 28, 0.1), 0 2px 10px rgba(14, 36, 28, 0.04);
+  border: 1.5px solid #dbead5;
+  overflow: hidden;
+  margin-bottom: 48px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.lp-how-visual-frame:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 64px rgba(14, 36, 28, 0.15);
+}
+.lp-how-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+.lp-how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1040px;
+  margin-bottom: 52px;
+}
+.lp-how-step-card {
+  background: #ffffff;
+  border: 1.5px solid #e2eddc;
+  border-radius: 20px;
+  padding: 30px 26px;
+  box-shadow: 0 8px 24px rgba(14, 36, 28, 0.04);
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.lp-how-step-card:hover {
+  transform: translateY(-3px);
+  border-color: #2b7b0e;
+  box-shadow: 0 12px 32px rgba(23, 107, 69, 0.1);
+}
+.lp-how-step-num {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #eaf5e3;
+  color: #176b45;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  border: 1px solid #cce5c4;
+}
+.lp-how-step-title {
+  margin: 0 0 10px;
+  font-family: var(--serif), 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #0e241c;
+  line-height: 26px;
+}
+.lp-how-step-body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14.5px;
+  line-height: 21px;
+  color: #4a5953;
+}
+.lp-how-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+  .lp-how-title {
+    font-size: 38px;
+    line-height: 42px;
+  }
+  .lp-how-steps {
+    grid-template-columns: 1fr;
+  }
+  .lp-how {
+    padding: 60px 20px 80px;
   }
 }

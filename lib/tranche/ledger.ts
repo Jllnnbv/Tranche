@@ -80,7 +80,7 @@ export function recordSigned(round: number, txHash: string, signedXdr: string) {
     if (!record)
       throw new PaiflowError(
         404,
-        { code: "NOT_FOUND", message: "No prepared Tranche payment has this hash." },
+        { code: "NOT_FOUND", message: "No prepared Ambagan payment has this hash." },
         null,
         null,
       );
@@ -117,7 +117,7 @@ export async function reconcile(round: number, txHash: string) {
   if (!record)
     throw new PaiflowError(
       404,
-      { code: "NOT_FOUND", message: "No Tranche payment has this hash." },
+      { code: "NOT_FOUND", message: "No Ambagan payment has this hash." },
       null,
       null,
     );
@@ -226,8 +226,8 @@ async function importHosted(round: number, items: StoredEvent[]) {
 
 /** Display label for a payout address: Vault, Fund, the receiver's destination label, or a member. */
 export function labelFor(group: Group, round: number, address: string) {
-  if (address === process.env.TRANCHE_VAULT_ACCOUNT) return "Vault";
-  if (address === process.env.TRANCHE_FUND_ACCOUNT) return "Fund";
+  if (address === (process.env.AMBAGAN_VAULT_ACCOUNT ?? process.env.TRANCHE_VAULT_ACCOUNT)) return "Vault";
+  if (address === (process.env.AMBAGAN_FUND_ACCOUNT ?? process.env.TRANCHE_FUND_ACCOUNT)) return "Fund";
   const r = group.rounds.find((x) => x.index === round);
   const receiver = r && memberById(group, r.receiverMemberId);
   const destination =
@@ -309,7 +309,7 @@ const share = (amount: string, bps: number) =>
  * contribution whose event has not arrived yet. Horizon holds the final balance.
  */
 export function vaultShares(group: Group, state: State) {
-  const vault = process.env.TRANCHE_VAULT_ACCOUNT;
+  const vault = process.env.AMBAGAN_VAULT_ACCOUNT ?? process.env.TRANCHE_VAULT_ACCOUNT;
   return group.members.map((m) => {
     const own = receiverRound(group, m.id);
     let held = 0n;

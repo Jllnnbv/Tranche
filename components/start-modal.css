@@ -83,11 +83,12 @@
 }
 .sm-title {
   top: 187px;
-  width: 272px;
+  width: 100%;
+  text-align: center;
   font-family: var(--serif), serif;
   font-weight: 500;
-  font-size: 88.8px;
-  line-height: 108px;
+  font-size: 78.8px;
+  line-height: 98px;
   letter-spacing: -0.02em;
 }
 .sm-text {
@@ -98,6 +99,26 @@
   font-weight: 500;
   letter-spacing: -0.02em;
   color: #454040;
+}
+.sm-learn-link {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 332px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #176b45;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+.sm-learn-link:hover {
+  color: #0e241c;
 }
 .sm-actions {
   top: 362px;

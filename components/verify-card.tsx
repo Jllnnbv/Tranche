@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { triggerPageTransition } from "./page-transition";
 import "./verify.css";
 
 export function VerifyCard() {
@@ -82,6 +83,7 @@ export function VerifyCard() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    triggerPageTransition();
     router.push("/dashboard");
   };
 
@@ -160,7 +162,7 @@ export function VerifyCard() {
         {/* Header Branding */}
         <header className="vf-header">
           <Link href="/" className="vf-branding">
-            <span className="vf-brand-name">Tranche</span>
+            <span className="vf-brand-name">Ambagan</span>
           </Link>
           <h1 className="vf-title">Verification Code</h1>
         </header>

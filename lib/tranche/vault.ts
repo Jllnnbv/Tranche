@@ -43,10 +43,10 @@ function horizon() {
 function sourceAccount(source: Source) {
   const key =
     source === "vault"
-      ? process.env.TRANCHE_VAULT_ACCOUNT
-      : process.env.TRANCHE_FUND_ACCOUNT;
+      ? (process.env.AMBAGAN_VAULT_ACCOUNT ?? process.env.TRANCHE_VAULT_ACCOUNT)
+      : (process.env.AMBAGAN_FUND_ACCOUNT ?? process.env.TRANCHE_FUND_ACCOUNT);
   if (!key || !StrKey.isValidEd25519PublicKey(key))
-    configError(`Set TRANCHE_${source.toUpperCase()}_ACCOUNT to a G-address.`);
+    configError(`Set AMBAGAN_${source.toUpperCase()}_ACCOUNT to a G-address.`);
   return key;
 }
 function parse(xdr: string): Transaction {
@@ -163,7 +163,7 @@ export async function createRelease(memberId: string, round: number) {
     conflict("A vault payment for this member and round already exists.");
   const share = vaultShares(group, state).find((s) => s.memberId === memberId)!;
   if (share.paymentsDue < 1 || BigInt(share.remainingStroops) <= 0n)
-    conflict("This member has no held tranche left.");
+    conflict("This member has no held ambagan left.");
   return createPayment({
     source: "vault",
     kind: "release",
@@ -214,10 +214,10 @@ export async function createForfeit(round: number, lateMemberId: string) {
   const state = await prepareState();
   const receiver = requireLate(group, state, round, lateMemberId);
   if (state.releases.some((r) => r.source === "vault" && kindOf(r) === "forfeit" && r.round === round && r.memberId === lateMemberId && active(r)))
-    conflict("This held tranche is already forfeited for this round.");
+    conflict("This held ambagan is already forfeited for this round.");
   const share = vaultShares(group, state).find((s) => s.memberId === lateMemberId)!;
   const remaining = BigInt(share.remainingStroops);
-  if (remaining <= 0n) conflict("This member has no held tranche left.");
+  if (remaining <= 0n) conflict("This member has no held ambagan left.");
   const due = BigInt(group.contributionStroops);
   return createPayment({
     source: "vault",

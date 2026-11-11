@@ -1,23 +1,17 @@
 "use client";
 
+import { memberNameFromEmail } from "./member-names";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fromStroops } from "@/lib/amount";
 import { browserRequest } from "@/lib/browser-api";
 import { LedgerModal, type LedgerData } from "./ledger-modal";
+import { DashboardLoading } from "./dashboard-loading";
+import { GroupDashboard } from "./group-dashboard";
+import { triggerPageTransition, stopPageTransition } from "./page-transition";
 import "./dashboard.css";
 
-// The live group from the Tranche backend (config/group.json + ledger).
-type GroupSummary = {
-  name: string;
-  contributionStroops: string;
-  activeRound: number | null;
-  members: { id: string }[];
-  rounds: { index: number; deadline: string; members: Record<string, string> }[];
-};
-
-export type PaluwaganItem = {
+export type AmbaganItem = {
   id: string;
   purpose: string;
   goal: string;
@@ -29,7 +23,78 @@ export type PaluwaganItem = {
   recipients?: { email: string; share: string }[];
   signature?: string;
   createdAt?: string;
+  hasProgress?: boolean;
 };
+export type PaluwaganItem = AmbaganItem;
+
+export const DEFAULT_SCHOOL_PROJECT: AmbaganItem = {
+  id: "school-project",
+  purpose: "School Project",
+  goal: "756",
+  start: "2026-10-14",
+  deadline: "2026-11-15",
+  frequency: "Bi-weekly",
+  payments: 6,
+  perPayment: "₱21",
+  hasProgress: false,
+  recipients: [
+    { email: "jullianna.villaluna12@gmail.com", share: "21" },
+    { email: "jomari@ambagan.ph", share: "21" },
+    { email: "keith@ambagan.ph", share: "21" },
+    { email: "matt@ambagan.ph", share: "21" },
+    { email: "rivera@ambagan.ph", share: "21" },
+    { email: "aniog@ambagan.ph", share: "21" },
+  ],
+  createdAt: "2026-10-14T00:00:00Z",
+};
+
+export const DEFAULT_ANTIPOLO: AmbaganItem = {
+  id: "antipolo-trip",
+  purpose: "ANTIPOLO TRIP",
+  goal: "12000",
+  start: "2026-10-14",
+  deadline: "2026-11-25",
+  frequency: "Bi-weekly",
+  payments: 6,
+  perPayment: "₱500",
+  hasProgress: false,
+  recipients: [
+    { email: "yana@ambagan.ph", share: "2000" },
+    { email: "jomari@ambagan.ph", share: "2000" },
+    { email: "keith@ambagan.ph", share: "2000" },
+    { email: "matt@ambagan.ph", share: "2000" },
+    { email: "rivera@ambagan.ph", share: "2000" },
+    { email: "aniog@ambagan.ph", share: "2000" },
+  ],
+  createdAt: "2026-10-14T00:00:00Z",
+};
+
+export const DEFAULT_AMBAGANS: AmbaganItem[] = [DEFAULT_SCHOOL_PROJECT, DEFAULT_ANTIPOLO];
+
+export function calculateDaysLeft(deadlineStr?: string, fallbackDays = 27): string {
+  if (!deadlineStr) return `${fallbackDays} days left`;
+  try {
+    const parts = deadlineStr.split("-");
+    const p0 = parts[0];
+    const p1 = parts[1];
+    const p2 = parts[2];
+    if (p0 && p1 && p2) {
+      const year = parseInt(p0, 10);
+      const month = parseInt(p1, 10) - 1;
+      const day = parseInt(p2, 10);
+      const target = new Date(Date.UTC(year, month, day));
+      const now = new Date();
+      const todayUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      const diffMs = target.getTime() - todayUtc.getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) return "Due past deadline";
+      if (diffDays === 0) return "Due today";
+      if (diffDays === 1) return "1 day left";
+      return `${diffDays} days left`;
+    }
+  } catch {}
+  return `${fallbackDays} days left`;
+}
 
 // Display name for the signed-in account: its username, else the name part of its email.
 function displayName(user: { username?: string; email?: string } | null): string {
@@ -63,21 +128,87 @@ function formatCardGoal(goal: string): string {
 }
 
 export function Dashboard() {
+  const [activePlanForDashboard, setActivePlanForDashboard] = useState<AmbaganItem | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "wallet" | "create" | "user">("home");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [paluwagans, setPaluwagans] = useState<PaluwaganItem[]>([]);
-  const [selectedPaluwagan, setSelectedPaluwagan] = useState<PaluwaganItem | null>(null);
+  const [ambagans, setAmbagans] = useState<AmbaganItem[]>(DEFAULT_AMBAGANS);
+  const [selectedAmbagan, setSelectedAmbagan] = useState<AmbaganItem | null>(null);
+  const [isNavigatingContract, setIsNavigatingContract] = useState(false);
   const router = useRouter();
-  const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState("Villaluna Jomari");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const navigateToContract = (url: string) => {
+    setIsNavigatingContract(true);
+    triggerPageTransition();
+    router.push(url);
+  };
+
+  const handleOpenGroup = (p: AmbaganItem) => {
+    triggerPageTransition();
+    setTimeout(() => {
+      setActivePlanForDashboard(p);
+      stopPageTransition();
+    }, 120);
+  };
+
+  const handleBackToDashboard = () => {
+    triggerPageTransition();
+    setTimeout(() => {
+      setActivePlanForDashboard(null);
+      stopPageTransition();
+    }, 120);
+  };
 
   useEffect(() => {
+    let mounted = true;
+    const loadProfile = () => {
+      try {
+        const saved = localStorage.getItem("ambagan_user_profile");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.fullName?.trim()) {
+            setUserName(parsed.fullName.trim());
+          }
+          if (parsed?.avatarUrl !== undefined) {
+            setAvatarUrl(parsed.avatarUrl);
+          }
+          return true;
+        }
+      } catch {}
+      return false;
+    };
+
+    const hasCustomProfile = loadProfile();
+
     browserRequest<{ username: string; email: string }>("/api/auth/me").then(
-      (user) => setUserName(displayName(user)),
-      () => router.replace("/login"),
+      (user) => {
+        if (!mounted) return;
+        if (!hasCustomProfile) {
+          const dn = displayName(user);
+          if (dn) setUserName(dn);
+        }
+      },
+      () => {
+        if (mounted) router.replace("/login");
+      },
     );
+
+    const handleProfileUpdate = () => {
+      loadProfile();
+    };
+
+    window.addEventListener("storage", handleProfileUpdate);
+    window.addEventListener("ambagan_profile_updated", handleProfileUpdate);
+    return () => {
+      mounted = false;
+      window.removeEventListener("storage", handleProfileUpdate);
+      window.removeEventListener("ambagan_profile_updated", handleProfileUpdate);
+    };
   }, [router]);
 
   async function logOut() {
+    triggerPageTransition();
     try {
       await browserRequest("/api/auth/logout", {});
     } finally {
@@ -85,30 +216,45 @@ export function Dashboard() {
       router.refresh();
     }
   }
-  const [group, setGroup] = useState<GroupSummary | null>(null);
-
-  useEffect(() => {
-    browserRequest<GroupSummary>("/api/tranche/group").then(setGroup, () => setGroup(null));
-  }, []);
-
-  const liveRound = group?.rounds.find((r) => r.index === group.activeRound);
-  const livePaid = liveRound ? Object.values(liveRound.members).filter((s) => s === "paid").length : 0;
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("tranche_paluwagans");
+      const saved = localStorage.getItem("ambagan_groups") ?? localStorage.getItem("tranche_paluwagans");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setPaluwagans(parsed.filter((item: PaluwaganItem) => item.id !== "pal-default"));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const filtered = parsed.filter((item: AmbaganItem) => item.id !== "pal-default" && item.id !== "amb-default");
+          const hasSchool = filtered.some((item) => item.id === "school-project" || item.purpose?.toLowerCase().includes("school"));
+          const list = hasSchool ? filtered : [DEFAULT_SCHOOL_PROJECT, ...filtered];
+          setAmbagans(list.length > 0 ? list : DEFAULT_AMBAGANS);
+          return;
         }
       }
-    } catch {}
+      setAmbagans(DEFAULT_AMBAGANS);
+    } catch {
+      setAmbagans(DEFAULT_AMBAGANS);
+    }
   }, []);
 
-  const handleCreatePaluwagan = (data: LedgerData) => {
-    const newItem: PaluwaganItem = {
-      id: "pal-" + Date.now(),
+  // Check URL query parameters for openPlan/plan (e.g., returning from /pay)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const openId = params.get("openPlan") || params.get("group") || params.get("plan");
+    if (openId) {
+      const found =
+        ambagans.find((p) => p.id === openId) ||
+        (openId === "school-project" ? DEFAULT_SCHOOL_PROJECT : null) ||
+        (openId === "antipolo-trip" ? DEFAULT_ANTIPOLO : null);
+      if (found) {
+        setActivePlanForDashboard(found);
+      }
+    }
+  }, [ambagans]);
+
+  const handleCreateAmbagan = (data: LedgerData) => {
+    const newItem: AmbaganItem = {
+      id: "amb-" + Date.now(),
       purpose: data.purpose.trim(),
       goal: data.goal.trim(),
       start: data.start,
@@ -118,39 +264,89 @@ export function Dashboard() {
       perPayment: data.perPayment,
       recipients: data.recipients,
       signature: data.signature,
+      hasProgress: false, // New plans start with 0 paid (first member unpaid)
       createdAt: new Date().toISOString(),
     };
 
-    setPaluwagans((prev) => {
+    try {
+      localStorage.setItem(`ambagan_settled_${newItem.id}`, "0");
+      localStorage.removeItem(`ambagan_paid_${newItem.id}`);
+      if (data.signature) {
+        const today = new Date();
+        const displayDate = today.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+        const orgSig = {
+          organizer: {
+            signatoryId: "organizer",
+            name: "Organizer (Ambagan Lead)",
+            email: "organizer@ambagan.ph",
+            role: "Organizer & Custody Lead",
+            type: data.signature.startsWith("data:image/") ? "drawn" : "typed",
+            signatureData: data.signature,
+            displayDate,
+            signedAt: today.toISOString(),
+          },
+        };
+        localStorage.setItem(`ambagan_signatures_${newItem.id}`, JSON.stringify(orgSig));
+      }
+    } catch {}
+
+    setAmbagans((prev) => {
       const updated = [newItem, ...prev];
       try {
+        localStorage.setItem("ambagan_groups", JSON.stringify(updated));
         localStorage.setItem("tranche_paluwagans", JSON.stringify(updated));
       } catch {}
       return updated;
     });
 
     setIsCreateModalOpen(false);
+    navigateToContract(`/contract?plan=${encodeURIComponent(newItem.id)}`);
   };
 
-  const handleDeletePaluwagan = (id: string) => {
-    setPaluwagans((prev) => {
+  const handleDeleteAmbagan = (id: string) => {
+    setAmbagans((prev) => {
       const updated = prev.filter((item) => item.id !== id);
       try {
+        localStorage.setItem("ambagan_groups", JSON.stringify(updated));
         localStorage.setItem("tranche_paluwagans", JSON.stringify(updated));
       } catch {}
       return updated;
     });
-    setSelectedPaluwagan(null);
+    setSelectedAmbagan(null);
   };
+
+  // If a specific purpose card is opened, render its Group Dashboard!
+  if (activePlanForDashboard) {
+    const isPlanPaid =
+      typeof window !== "undefined" &&
+      (localStorage.getItem(`ambagan_paid_${activePlanForDashboard.id}`) === "true" ||
+        activePlanForDashboard.hasProgress === true);
+
+    return (
+      <GroupDashboard
+        plan={{
+          ...activePlanForDashboard,
+          hasProgress: isPlanPaid,
+        }}
+        onBack={handleBackToDashboard}
+        initialMode={isPlanPaid ? "one_paid" : "empty"}
+      />
+    );
+  }
+
+  // Purpose Cards Main View
   return (
     <div className="db">
-      {/* Background Gradient */}
+      {isNavigatingContract && <DashboardLoading />}
       <div className="db-bg" aria-hidden="true" />
 
-      {/* Top Header: Tranche Logo + Wordmark */}
+      {/* Top Header: Ambagan Logo + Wordmark */}
       <header className="db-header">
         <Link href="/" className="db-brand">
-          {/* Group 1 / Logo with glow */}
           <div className="db-logo-group">
             <svg
               width="45.41"
@@ -170,13 +366,12 @@ export function Dashboard() {
               <image href="/images/logo.svg" width="45.41" height="44.16" preserveAspectRatio="none" />
             </svg>
           </div>
-          <span className="db-brand-name">Tranche</span>
+          <span className="db-brand-name">Ambagan</span>
         </Link>
       </header>
 
-      {/* Frame 23: Left Navigation Sidebar */}
+      {/* Frame 51: Left Navigation Sidebar */}
       <aside className="db-sidebar" aria-label="Navigation Sidebar">
-        {/* Frame 24: Home */}
         <button
           type="button"
           className={`db-sidebar-btn db-btn-home ${activeTab === "home" ? "db-btn-active" : ""}`}
@@ -188,7 +383,6 @@ export function Dashboard() {
           </svg>
         </button>
 
-        {/* Frame 25: Wallet */}
         <button
           type="button"
           className={`db-sidebar-btn db-btn-wallet ${activeTab === "wallet" ? "db-btn-active" : ""}`}
@@ -196,27 +390,31 @@ export function Dashboard() {
           aria-label="Payments"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="#E1EDA0" aria-hidden="true">
-            <path d="M3 4h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v6h3.5l1 2h7l1-2H20V6zm0 8v4h16v-4h-2.4l-1 2H7.400l-1-2z" fillRule="evenodd" />
+            <path
+              d="M3 4h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v6h3.5l1 2h7l1-2H20V6zm0 8v4h16v-4h-2.4l-1 2H7.400l-1-2z"
+              fillRule="evenodd"
+            />
           </svg>
         </button>
 
-        {/* Frame 24: Plus Math */}
         <button
           type="button"
           className={`db-sidebar-btn db-btn-plus ${activeTab === "create" ? "db-btn-active" : ""}`}
           onClick={() => setIsCreateModalOpen(true)}
-          aria-label="Create"
+          aria-label="Create Ambagan"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M12 3v18M3 12h18" stroke="#E1EDA0" strokeWidth="2.6" strokeLinecap="round" />
           </svg>
         </button>
 
-        {/* Frame 26: User Profile */}
         <button
           type="button"
           className={`db-sidebar-btn db-btn-user ${activeTab === "user" ? "db-btn-active" : ""}`}
-          onClick={() => setActiveTab("user")}
+          onClick={() => {
+            triggerPageTransition();
+            router.push("/profile");
+          }}
           aria-label="User profile"
         >
           <svg width="32" height="32" viewBox="0 0 24 24" fill="#E1EDA0" aria-hidden="true">
@@ -226,19 +424,40 @@ export function Dashboard() {
         </button>
       </aside>
 
-      {/* Frame 27: Main Card */}
+      {/* Frame 27: Main Purpose Cards View */}
       <main className="db-main-card">
-        {/* Frame 27 Top Header Row */}
+        {/* Card Header Row */}
         <header className="db-card-header">
-          {/* Left Greeting */}
           <div className="db-greeting">
-            <h1 className="db-greeting-title">{userName ? `Good day, ${userName}! 👋` : "Good day! 👋"}</h1>
-            <p className="db-greeting-sub">Here&apos;s an overview of your savings journey.</p>
+            <div
+              className="db-greeting-link"
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                triggerPageTransition();
+                router.push("/profile");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  triggerPageTransition();
+                  router.push("/profile");
+                }
+              }}
+              title="Open User Profile Settings"
+            >
+              <h1 className="db-greeting-title">{userName ? `Good day, ${userName}!` : "Good day!"}</h1>
+              <span className="db-greeting-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                <span>Profile</span>
+              </span>
+            </div>
+            <p className="db-greeting-sub">Select a purpose card below to view its live rotating savings dashboard.</p>
           </div>
 
-          {/* Right Action Controls */}
           <div className="db-header-controls">
-            {/* Date Pill */}
             <div className="db-date-pill">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="18" rx="2" stroke="#176B45" strokeWidth="2" />
@@ -247,97 +466,110 @@ export function Dashboard() {
               <span>October 14, 2026</span>
             </div>
 
-            {/* Notification Bell */}
-            <button type="button" className="db-icon-btn" aria-label="Notifications">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#176B45"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            <div
+              className="db-avatar"
+              title={`${userName || "User"} (Profile Settings)`}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                triggerPageTransition();
+                router.push("/profile");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  triggerPageTransition();
+                  router.push("/profile");
+                }
+              }}
+              style={{ cursor: "pointer", overflow: "hidden" }}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={userName || "Profile"}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
                 />
-              </svg>
-            </button>
-
-            {/* User Avatar */}
-            <div className="db-avatar" title={userName}>
-              <span>{userName.charAt(0)}</span>
+              ) : (
+                <span>{userName ? userName.charAt(0).toUpperCase() : "U"}</span>
+              )}
             </div>
             <button type="button" className="db-logout" onClick={() => void logOut()}>
               Log out
             </button>
 
-            {/* + Create Paluwagan Magenta Button */}
             <button
               type="button"
-              className="db-btn-create-paluwagan"
+              className="db-btn-create-paluwagan db-btn-create-ambagan"
               onClick={() => setIsCreateModalOpen(true)}
             >
-              + Create Paluwagan
+              + Create Ambagan
             </button>
           </div>
         </header>
 
-        {/* Paluwagan Cards Container */}
+        {/* Purpose Cards Container */}
         <div className="db-cards-container">
-          {/* Live group from the Tranche backend */}
-          {group && (
-            <div className="db-purpose-card db-purpose-card-live">
-              <div className="db-card-content">
-                <div className="db-card-illu-glow" aria-hidden="true" />
-                <img src="/images/image-14.svg" alt="" width={107.11} height={104.16} className="db-card-illu-img" />
-                <div className="db-card-text">
-                  <h3 className="db-card-title" title={group.name}>{group.name}</h3>
-                  <p className="db-card-desc-1">
-                    {liveRound
-                      ? `Round ${liveRound.index} of ${group.rounds.length} · ${livePaid}/${group.members.length} paid`
-                      : "No open round"}
-                  </p>
-                  <p className="db-card-desc-2">
-                    {liveRound ? `Due ${formatCardDate(liveRound.deadline.slice(0, 10))}` : "Live on Stellar testnet"}
-                  </p>
-                </div>
-                <div className="db-card-action">
-                  <span className="db-card-price">{fromStroops(group.contributionStroops)} XLM</span>
-                  <Link href="/pay" className="db-card-btn" aria-label={`Pay ${group.name}`}>
-                    <span className="db-card-btn-label">Pay</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {paluwagans.map((p) => {
-            // Cards saved before placeholders were removed may still hold "<<…>>" text.
+          {ambagans.map((p) => {
             const displayTitle = p.purpose?.startsWith("<<") ? "" : (p.purpose ?? "");
-            const displayStart = p.start
-              ? `Started: ${formatCardDate(p.start)}`
-              : "";
-            const displayDeadline = p.deadline
-              ? `Deadline: ${formatCardDate(p.deadline)}`
-              : "";
+            const displayStart = p.start ? `Started: ${formatCardDate(p.start)}` : "";
+            const displayDeadline = p.deadline ? `Deadline: ${formatCardDate(p.deadline)}` : "";
             const displayGoal = formatCardGoal(p.goal);
+            const daysLeft = calculateDaysLeft(p.deadline, p.id === "antipolo-trip" ? 27 : 17);
+            const memberCount = p.recipients?.length || p.payments || 6;
+            const extraMembers = Math.max(0, memberCount - 3);
+            const totalRounds = p.payments || memberCount || 6;
+            let settledNow = p.id === "antipolo-trip" ? 2 : 0;
+            try {
+              const st = localStorage.getItem(`ambagan_settled_${p.id}`);
+              if (st !== null) settledNow = Number(st);
+              else if (localStorage.getItem(`ambagan_paid_${p.id}`) === "true") settledNow = 1;
+            } catch {}
+            const nextRecipient = p.recipients?.length ? p.recipients[settledNow % p.recipients.length] : undefined;
+            const nextPayerLabel = nextRecipient ? memberNameFromEmail(nextRecipient.email, settledNow) : "Next member";
+            const currentRound = p.hasProgress ? 3 : 1;
 
             return (
               <div key={p.id} className="db-purpose-card">
-                {/* Card content */}
                 <div className="db-card-content">
-                  {/* Ellipse 3 Glow */}
                   <div className="db-card-illu-glow" aria-hidden="true" />
 
-                  {/* image 14 */}
                   <img
                     src="/images/image-14.svg"
                     alt=""
-                    width={107.11}
-                    height={104.16}
+                    width={90}
+                    height={88}
                     className="db-card-illu-img"
+                    onClick={() => handleOpenGroup(p)}
+                    style={{ cursor: "pointer" }}
                   />
 
-                  {/* Card text */}
+                  {/* Badges: Round & Days Left (from the group status) */}
+                  <div className="db-card-badges">
+                    <span className="db-badge-pill db-badge-green" title={`Round ${currentRound} of ${totalRounds}`}>
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M11 14v-1.5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3V14" stroke="#176B45" strokeWidth="2" strokeLinecap="round" />
+                        <circle cx="6.5" cy="4.5" r="2.5" stroke="#176B45" strokeWidth="2" />
+                        <path d="M14 14v-1a2.5 2.5 0 0 0-2-2.45M10.5 2.1a2.5 2.5 0 0 1 0 4.8" stroke="#176B45" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      <span>Round {currentRound} of {totalRounds}</span>
+                    </span>
+
+                    <span className="db-badge-pill db-badge-amber" title={daysLeft}>
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <circle cx="8" cy="8" r="6" stroke="#D97706" strokeWidth="1.8" />
+                        <path d="M8 5v3.5l2 1.5" stroke="#D97706" strokeWidth="1.8" strokeLinecap="round" />
+                      </svg>
+                      <span>{daysLeft}</span>
+                    </span>
+                  </div>
+
                   <div className="db-card-text">
-                    <h3 className="db-card-title" title={displayTitle}>
+                    <h3
+                      className="db-card-title"
+                      title={displayTitle}
+                      onClick={() => handleOpenGroup(p)}
+                      style={{ cursor: "pointer" }}
+                    >
                       {displayTitle}
                     </h3>
                     <p className="db-card-desc-1" title={displayStart}>
@@ -348,37 +580,69 @@ export function Dashboard() {
                     </p>
                   </div>
 
-                  {/* Product action */}
+                  {/* Group Members Snippet (how many they are) */}
+                  <div className="db-card-members" title={`${memberCount} members`}>
+                    <div className="db-avatar-stack">
+                      <span className="db-member-avatar" style={{ background: "#B54880" }} />
+                      <span className="db-member-avatar" style={{ background: "#176B45" }} />
+                      <span className="db-member-avatar" style={{ background: "#D97706" }} />
+                      {extraMembers > 0 && <span className="db-member-avatar db-avatar-count">+{extraMembers}</span>}
+                    </div>
+                    <span className="db-members-note">{memberCount} members · {nextPayerLabel} pays next</span>
+                  </div>
+
                   <div className="db-card-action">
-                    <span className="db-card-price" title={displayGoal}>
-                      {displayGoal}
-                    </span>
-                    <button
-                      type="button"
-                      className="db-card-btn"
-                      onClick={() => setSelectedPaluwagan(p)}
-                      aria-label={`View ${displayTitle || "paluwagan"}`}
-                    >
-                      <span className="db-card-btn-label">View</span>
-                    </button>
+                    <div className="db-card-price-col">
+                      <span className="db-card-price" title={displayGoal}>
+                        {displayGoal}
+                      </span>
+                      {p.perPayment && (
+                        <span className="db-card-per-payment" title={`${p.perPayment} per cycle`}>
+                          {p.perPayment}/cycle
+                        </span>
+                      )}
+                    </div>
+                    <div className="db-card-btn-row">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenGroup(p)}
+                        className="db-card-btn db-card-btn-view"
+                        aria-label={`View ${displayTitle || "ambagan"}`}
+                      >
+                        <span className="db-card-btn-label">View</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigateToContract(`/contract?plan=${encodeURIComponent(p.id)}`)}
+                        className="db-card-btn"
+                        aria-label={`Open e-contract for ${displayTitle || "ambagan"}`}
+                      >
+                        <span className="db-card-btn-label">Contract</span>
+                      </button>
+                      <Link
+                        href={`/pay?plan=${encodeURIComponent(p.id)}`}
+                        className="db-card-btn"
+                        aria-label={`Pay ${displayTitle || "ambagan"}`}
+                      >
+                        <span className="db-card-btn-label">Pay</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
             );
           })}
 
-          {/* Frame 28: Add Paluwagan Card */}
+          {/* Add Ambagan Card */}
           <div
             className="db-card-create"
             role="button"
             tabIndex={0}
             onClick={() => setIsCreateModalOpen(true)}
             onKeyDown={(e) => e.key === "Enter" && setIsCreateModalOpen(true)}
-            aria-label="Create Paluwagan"
+            aria-label="Create Ambagan"
           >
-            {/* Ellipse 4: Magenta circle with shadow */}
             <div className="db-create-circle">
-              {/* Plus Math */}
               <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
                 <path d="M15 6v18M6 15h18" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
               </svg>
@@ -387,153 +651,11 @@ export function Dashboard() {
         </div>
       </main>
 
-      {/* View Paluwagan Detail Modal */}
-      {selectedPaluwagan && (
-        <div
-          className="db-detail-overlay"
-          onClick={() => setSelectedPaluwagan(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="db-detail-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="db-detail-header">
-              <div className="db-detail-header-left">
-                <div className="db-detail-logo-thumb">
-                  <img
-                    src="/images/image-14.svg"
-                    alt=""
-                    width={32}
-                    height={32}
-                  />
-                </div>
-                <div>
-                  <h2 className="db-detail-title">
-                    {selectedPaluwagan.purpose?.startsWith("<<") ? "" : selectedPaluwagan.purpose}
-                  </h2>
-                  <span className="db-detail-badge">Active Savings Plan</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="db-detail-close"
-                onClick={() => setSelectedPaluwagan(null)}
-                aria-label="Close"
-              >
-                &times;
-              </button>
-            </div>
-
-            {/* Target Goal Section */}
-            <div className="db-detail-section">
-              <div className="db-detail-section-title">Target Goal</div>
-              <div className="db-detail-goal-row">
-                <span className="db-detail-goal-val">
-                  {formatCardGoal(selectedPaluwagan.goal)}
-                </span>
-                <span style={{ fontSize: "12px", color: "#176B45", fontWeight: 600 }}>
-                  Non-Custodial Tranche
-                </span>
-              </div>
-            </div>
-
-            {/* Timeline Section */}
-            <div className="db-detail-section">
-              <div className="db-detail-section-title">Timeline</div>
-              <div className="db-detail-dates-grid">
-                <div className="db-detail-date-box">
-                  <div className="db-detail-date-label">Validation Started Date</div>
-                  <div className="db-detail-date-val">
-                    {selectedPaluwagan.start ? formatCardDate(selectedPaluwagan.start) : "Pending"}
-                  </div>
-                </div>
-                <div className="db-detail-date-box">
-                  <div className="db-detail-date-label">Validating Deadline Date</div>
-                  <div className="db-detail-date-val">
-                    {selectedPaluwagan.deadline ? formatCardDate(selectedPaluwagan.deadline) : "Pending"}
-                  </div>
-                </div>
-              </div>
-              {selectedPaluwagan.frequency && (
-                <div className="db-detail-date-box" style={{ marginTop: 10 }}>
-                  <div className="db-detail-date-label">Payout frequency</div>
-                  <div className="db-detail-date-val">
-                    {selectedPaluwagan.frequency}
-                    {selectedPaluwagan.payments ? ` · ${selectedPaluwagan.payments} payments` : ""}
-                    {selectedPaluwagan.perPayment ? ` · ${selectedPaluwagan.perPayment} per member each payment` : ""}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Recipients Section */}
-            {selectedPaluwagan.recipients && selectedPaluwagan.recipients.length > 0 && (
-              <div className="db-detail-section">
-                <div className="db-detail-section-title">
-                  Recipients &amp; Allocations ({selectedPaluwagan.recipients.length})
-                </div>
-                <div className="db-detail-recipients-list">
-                  {selectedPaluwagan.recipients.map((r, idx) => (
-                    <div key={idx} className="db-detail-recipient-row">
-                      <span className="db-detail-recipient-email">{r.email || `Member ${idx + 1}`}</span>
-                      <span className="db-detail-recipient-share">
-                        {r.share ? `₱ ${parseFloat(r.share).toLocaleString("en-US")}` : "Unallocated"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* E-Signature Verification */}
-            <div className="db-detail-section" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div>
-                <div className="db-detail-section-title" style={{ margin: 0 }}>E-Signature Status</div>
-                <div style={{ fontSize: "13px", color: "#176B45", fontWeight: 600, marginTop: "4px" }}>
-                  ✓ Validated on Record
-                </div>
-              </div>
-              {selectedPaluwagan.signature && selectedPaluwagan.signature.startsWith("data:image") ? (
-                <img
-                  src={selectedPaluwagan.signature}
-                  alt="E-Signature"
-                  style={{ maxHeight: "36px", maxWidth: "100px", objectFit: "contain", border: "1px dashed #CBD5E1", borderRadius: "6px", padding: "2px" }}
-                />
-              ) : null}
-            </div>
-
-            {/* Actions */}
-            <div className="db-detail-actions">
-              <Link href={`/pay?plan=${encodeURIComponent(selectedPaluwagan.id)}`} className="db-detail-btn-action">
-                Make Contribution
-              </Link>
-              <button
-                type="button"
-                className="db-detail-btn-secondary"
-                onClick={() => handleDeletePaluwagan(selectedPaluwagan.id)}
-                style={{ color: "#EF4444" }}
-              >
-                Delete
-              </button>
-              <button
-                type="button"
-                className="db-detail-btn-secondary"
-                onClick={() => setSelectedPaluwagan(null)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Ledger Creation Modal */}
       {isCreateModalOpen && (
         <LedgerModal
           onClose={() => setIsCreateModalOpen(false)}
-          onCreate={handleCreatePaluwagan}
+          onCreate={handleCreateAmbagan}
         />
       )}
     </div>

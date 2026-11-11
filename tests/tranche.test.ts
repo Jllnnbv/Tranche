@@ -130,7 +130,7 @@ it("deduplicates events by eventId and keeps the cursor", async () => {
   expect(String(mockFetch.mock.calls[1]![0])).toContain("cursor=c1");
 });
 
-it("computes held tranches with bigint stroops", async () => {
+it("computes held ambagan with bigint stroops", async () => {
   await withStore((s) => {
     for (const memberId of ["m1", "m2", "m3", "m4", "m5"])
       s.contributions.push({
@@ -216,7 +216,7 @@ it("refuses Safety Fund cover and forfeit unless the member is late", async () =
   expect((await cover(post("/api/tranche/fund/cover", { round: 1, memberId: "m1" }))).status).toBe(409);
   expect((await cover(post("/api/tranche/fund/cover", { round: 1, memberId: "m2" }))).status).toBe(409);
   expect((await forfeit(post("/api/tranche/vault/forfeit", { round: 1, memberId: "m2" }))).status).toBe(409);
-  // m3 is late but holds no tranche, so there is nothing to forfeit.
+  // m3 is late but holds no ambagan, so there is nothing to forfeit.
   expect((await forfeit(post("/api/tranche/vault/forfeit", { round: 1, memberId: "m3" }))).status).toBe(409);
   expect((await cover(post("/api/tranche/fund/cover", { round: 1, memberId: "nobody" }))).status).toBe(409);
 });

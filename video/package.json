@@ -1,0 +1,28 @@
+{
+  "name": "ambagan-marketing-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright + Remotion programmatic motion graphics video studio for Ambagan",
+  "scripts": {
+    "audio": "node scripts/generate-audio.mjs",
+    "capture": "node scripts/capture-playwright.mjs",
+    "preview": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts AmbaganMarketingAd out/ambagan-marketing-ad.mp4 --codec=h264 --crf=18",
+    "all": "npm run audio && npm run capture && npm run render"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.286",
+    "@remotion/google-fonts": "4.0.286",
+    "@remotion/transitions": "4.0.286",
+    "playwright": "^1.51.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.286"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.7.2"
+  }
+}

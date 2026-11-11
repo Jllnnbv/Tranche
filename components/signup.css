@@ -393,3 +393,20 @@
   text-align: center;
 }
 .su-signup-btn:disabled { opacity: 0.6; cursor: wait; }
+
+.su-current-user-banner {
+  margin: -16px 0 20px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: #eaf3e3;
+  border: 1px solid #cce3c1;
+  font-size: 13px;
+  color: #1f3a19;
+  text-align: center;
+}
+.su-current-user-banner a {
+  color: #176b45;
+  font-weight: 600;
+  text-decoration: underline;
+  margin-left: 4px;
+}

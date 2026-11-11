@@ -23,7 +23,7 @@ export function Hero() {
       className="lp"
       style={
         {
-          "--serif": "'Cormorant Garamond', serif",
+          "--serif": "'Playfair Display', Georgia, serif",
           "--chivo": "'Chivo', sans-serif",
           fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
         } as React.CSSProperties
@@ -37,7 +37,7 @@ export function Hero() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/hero.svg"
-          alt="Tranche savings illustration"
+          alt="Ambagan savings illustration"
           className="lp-photo"
         />
 
@@ -61,7 +61,7 @@ export function Hero() {
                 preserveAspectRatio="none"
               />
             </svg>
-            <span className="lp-wordmark">Tranche</span>
+            <span className="lp-wordmark">Ambagan</span>
           </a>
           <button type="button" className="lp-nav-cta" onClick={() => setOpen(true)}>
             Start Saving
@@ -79,15 +79,12 @@ export function Hero() {
 
         <div className="lp-copy">
           <p className="lp-kicker">
-            Secure the split,
-            <br />
-            increase the value.
+            Secure the Split, Scale the Synergy:
           </p>
           <h1 className="lp-title">
-            <span className="lp-t1">Reimagined for</span>
-            <br />
-            <span className="lp-t2">the </span>
-            <span className="lp-t3">blockchain</span>
+            <span className="lp-title-line">Blockchain-Powered</span>
+            <span className="lp-title-line">Infrastructure for</span>
+            <span className="lp-title-line">Shared Value</span>
           </h1>
           <p className="lp-sub">
             Deconstruct pools of value into secure programmable portions with
@@ -106,7 +103,14 @@ export function Hero() {
                 />
               </svg>
             </button>
-            <a href="#how" className="lp-secondary">
+            <a
+              href="#how"
+              className="lp-secondary"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
               See How It Works
               <svg width="21" height="16" viewBox="0 0 21 16" fill="none" aria-hidden="true">
                 <path
@@ -130,7 +134,71 @@ export function Hero() {
           ))}
         </dl>
       </div>
-      <span id="how" />
+
+      {/* Seamless "How Ambagan Works" Section */}
+      <section id="how" className="lp-how" aria-label="How Ambagan Works">
+        <div className="lp-how-container">
+          <div className="lp-how-header">
+            <span className="lp-how-tag">Non-Custodial Ambagan Engine</span>
+            <h2 className="lp-how-title">How Ambagan Works</h2>
+            <p className="lp-how-desc">
+              No single person holds or controls the pot. Every contribution is automatically governed on the blockchain by programmable smart rules.
+            </p>
+          </div>
+
+          <div className="lp-how-visual-frame">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/how-it-works.png"
+              alt="How Ambagan Works diagram: The Deposit Pool, The Smart Split, Immediate Allocation, Ambagan Vault, and Safety Fund"
+              className="lp-how-img"
+              width={1024}
+              height={423}
+            />
+          </div>
+
+          <div className="lp-how-steps">
+            <div className="lp-how-step-card">
+              <div className="lp-how-step-num">1</div>
+              <h3 className="lp-how-step-title">The Deposit Pool</h3>
+              <p className="lp-how-step-body">
+                A single, transparent pool where all group members safely send their contributions together on Stellar testnet.
+              </p>
+            </div>
+
+            <div className="lp-how-step-card">
+              <div className="lp-how-step-num">2</div>
+              <h3 className="lp-how-step-title">The Automated Split</h3>
+              <p className="lp-how-step-body">
+                The smart contract instantly separates the funds according to predetermined rules: Immediate Allocation (e.g., 77%), Ambagan Vault (e.g., 20%), and Safety Fund (e.g., 3%).
+              </p>
+            </div>
+
+            <div className="lp-how-step-card">
+              <div className="lp-how-step-num">3</div>
+              <h3 className="lp-how-step-title">Collaborative Release</h3>
+              <p className="lp-how-step-body">
+                Locked funds in the vault and safety fund are only released with group approval (Multisig sign-off), preventing anyone from running away with the money.
+              </p>
+            </div>
+          </div>
+
+          <div className="lp-how-actions">
+            <button type="button" className="lp-primary" onClick={() => setOpen(true)}>
+              Start Saving Now
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M10 17l5-5-5-5M15 12H3M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <Link href="/contract" className="lp-secondary">
+              Review Group E-Contract
+              <svg width="21" height="16" viewBox="0 0 21 16" fill="none" aria-hidden="true">
+                <path d="M1 8h18M12 1l7 7-7 7" stroke="#12291C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {open && (
         <div className="sm-overlay" onClick={() => setOpen(false)}>
@@ -180,10 +248,20 @@ export function Hero() {
               </g>
               <image href="/images/logo.svg" width="95.78" height="93.15" preserveAspectRatio="none" />
             </svg>
-            <p className="sm-title">Tranche</p>
+            <p className="sm-title">Ambagan</p>
             <p className="sm-text">
-              Tranche is a paluwagan app. No person holds the pot. Each splits on the blockchain to the receiver, the Tranche Vault, and the Safety Fund.
+              Ambagan is an ambagan app. No person holds the pot. Each splits on the blockchain to the receiver, the Ambagan Vault, and the Safety Fund.
             </p>
+            <button
+              type="button"
+              className="sm-learn-link"
+              onClick={() => {
+                setOpen(false);
+                document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              See how the automated split works ↓
+            </button>
             <div className="sm-actions">
               <Link href="/signup" className="sm-signup">
                 Sign up

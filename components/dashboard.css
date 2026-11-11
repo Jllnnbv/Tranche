@@ -1,4 +1,4 @@
-/* DASHBOARD STYLING - TRANCHE REVISED SPEC */
+/* DASHBOARD STYLING - AMBAGAN REVISED SPEC */
 
 .db {
   position: relative;
@@ -19,7 +19,7 @@
   pointer-events: none;
 }
 
-/* Header: Tranche Logo + Wordmark */
+/* Header: Ambagan Logo + Wordmark */
 .db-header {
   position: absolute;
   left: 139px;
@@ -115,6 +115,18 @@
   top: 142.27px;
 }
 
+/* Frame 25b: E-Contract Button */
+.db-btn-contract {
+  top: 197.04px;
+}
+.db-btn-contract svg {
+  stroke: #E1EDA0;
+}
+.db-btn-contract:hover svg,
+.db-btn-contract.db-btn-active svg {
+  stroke: #B54880;
+}
+
 /* Double Right Arrow */
 .db-sidebar-arrow {
   position: absolute;
@@ -175,6 +187,25 @@
   gap: 2px;
 }
 
+.db-greeting-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  user-select: none;
+  outline: none;
+  border-radius: 8px;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
+}
+
+.db-greeting-link:hover {
+  transform: translateX(2px);
+}
+
 .db-greeting-title {
   margin: 0;
   font-family: Poppins, sans-serif;
@@ -182,6 +213,36 @@
   font-weight: 700;
   color: #0E241C;
   line-height: 33px;
+  transition: color 0.18s ease;
+}
+
+.db-greeting-link:hover .db-greeting-title {
+  color: #176B45;
+}
+
+.db-greeting-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #E8F5E4;
+  color: #176B45;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(23, 107, 69, 0.22);
+  transition: all 0.2s ease;
+  opacity: 0.85;
+}
+
+.db-greeting-link:hover .db-greeting-pill {
+  opacity: 1;
+  background: #176B45;
+  color: #FFFFFF;
+  border-color: #176B45;
+  box-shadow: 0 2px 6px rgba(23, 107, 69, 0.25);
+  transform: scale(1.04);
 }
 
 .db-greeting-sub {
@@ -246,10 +307,19 @@
   align-items: center;
   justify-content: center;
   user-select: none;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  flex-shrink: 0;
 }
 
-/* + Create Paluwagan Magenta Button */
-.db-btn-create-paluwagan {
+.db-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(192, 70, 135, 0.35);
+}
+
+/* + Create Ambagan Magenta Button */
+.db-btn-create-paluwagan,
+.db-btn-create-ambagan {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -267,12 +337,13 @@
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-.db-btn-create-paluwagan:hover {
+.db-btn-create-paluwagan:hover,
+.db-btn-create-ambagan:hover {
   transform: translateY(-1px);
   opacity: 0.95;
 }
 
-/* Paluwagan Cards Grid/Row Container inside Main Card */
+/* Ambagan Cards Grid/Row Container inside Main Card */
 .db-cards-container {
   display: flex;
   flex-direction: row;
@@ -286,10 +357,10 @@
 .db-purpose-card {
   box-sizing: border-box;
   position: relative;
-  width: 262px;
-  height: 390px;
+  width: 278px;
+  height: 440px;
   background: #D3EFC9;
-  border-radius: 12.838px;
+  border-radius: 16px;
   overflow: hidden;
   flex: none;
   box-shadow: 0px 4px 18px rgba(14, 36, 28, 0.08);
@@ -304,21 +375,18 @@
 /* Card content */
 .db-card-content {
   position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0.05px;
+  inset: 0;
 }
 
 /* Ellipse 3 */
 .db-card-illu-glow {
   position: absolute;
-  width: 94.35px;
-  height: 94.35px;
-  left: 83.41px;
-  top: 40.28px;
+  width: 80px;
+  height: 80px;
+  left: calc(50% - 40px);
+  top: 18px;
   background: #B54880;
-  filter: blur(24.4929px);
+  filter: blur(20px);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -326,37 +394,75 @@
 /* image 14 */
 .db-card-illu-img {
   position: absolute;
-  width: 107.11px;
-  height: 104.16px;
-  left: 77px;
-  top: 35px;
+  width: 84px;
+  height: 82px;
+  left: calc(50% - 42px);
+  top: 16px;
   object-fit: contain;
   user-select: none;
-  pointer-events: none;
+}
+
+/* Badges: Round & Days Left (from the group status) */
+.db-card-badges {
+  position: absolute;
+  top: 108px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+
+.db-badge-pill {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 3px 8px;
+  gap: 4px;
+  height: 20px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 13px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.db-badge-green {
+  background: #E8F5E4;
+  color: #176B45;
+  border: 1px solid rgba(23, 107, 69, 0.2);
+}
+
+.db-badge-amber {
+  background: #FEF3C7;
+  color: #D97706;
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 
 /* Card text */
 .db-card-text {
   position: absolute;
-  height: 93.26px;
-  left: 22px;
-  right: 22.93px;
-  top: 178px;
+  left: 18px;
+  right: 18px;
+  top: 138px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Card title */
 .db-card-title {
-  margin: 0;
-  position: absolute;
-  height: 30px;
-  left: 0px;
-  right: 0px;
-  top: 19.63px;
+  margin: 0 0 4px 0;
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: normal;
-  font-weight: 500;
-  font-size: 28.8855px;
-  line-height: 104%;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.1;
   color: #0E241C;
   white-space: nowrap;
   overflow: hidden;
@@ -365,37 +471,82 @@
 
 /* Card description */
 .db-card-desc-1 {
-  margin: 0;
-  position: absolute;
-  height: 17px;
-  left: 0px;
-  right: 0px;
-  top: 59.26px;
+  margin: 0 0 2px 0;
   font-family: 'Inter', system-ui, sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 11.2332px;
-  line-height: 150%;
-  color: #0E241C;
+  font-size: 11.5px;
+  line-height: 140%;
+  color: #374151;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Card description */
 .db-card-desc-2 {
   margin: 0;
-  position: absolute;
-  height: 17px;
-  left: 1px;
-  right: -1px;
-  top: 76px;
   font-family: 'Inter', system-ui, sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 11.2332px;
-  line-height: 150%;
-  color: #0E241C;
+  font-size: 11.5px;
+  line-height: 140%;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Group Members Snippet (from the uploaded screenshot) */
+.db-card-members {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 242px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(23, 107, 69, 0.12);
+  border-radius: 999px;
+  padding: 4px 10px 4px 8px;
+  box-sizing: border-box;
+}
+
+.db-avatar-stack {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 6px;
+}
+
+.db-member-avatar {
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  margin-left: -6px;
+  border: 1.5px solid #FFFFFF;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.db-avatar-count {
+  background: #E5E7EB !important;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-color: #FFFFFF;
+}
+
+.db-members-note {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #1F2937;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -409,49 +560,67 @@
   align-items: center;
   padding: 0px;
   position: absolute;
-  height: 38.51px;
-  left: 22.47px;
-  right: 22.47px;
-  top: 328.97px;
+  height: 42px;
+  left: 16px;
+  right: 16px;
+  top: 382px;
+  gap: 8px;
+}
+
+.db-card-price-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 /* Product price */
 .db-card-price {
-  width: 116px;
-  height: 15px;
   font-family: 'Inter', system-ui, sans-serif;
   font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 15px;
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.2;
   color: #0E241C;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: none;
-  order: 0;
-  flex-grow: 0;
+}
+
+.db-card-per-payment {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #176B45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Button */
 .db-card-btn {
   box-sizing: border-box;
-  display: flex;
+  margin: 0 !important;
+  display: inline-flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 0px 19.257px;
-  gap: 19.26px;
-  width: 65.51px;
-  height: 38.51px;
+  padding: 0px 14px;
+  gap: 0;
+  width: auto;
+  min-width: 0;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
   border: 0.802374px solid #0E241C;
   border-radius: 80.2374px;
   background: transparent;
   cursor: pointer;
   transition: all 0.15s ease;
-  flex: none;
-  order: 1;
-  flex-grow: 0;
+  vertical-align: middle;
+  text-decoration: none;
+  flex: 1 1 0;
 }
 
 .db-card-btn:hover {
@@ -462,23 +631,46 @@
   color: #D3EFC9;
 }
 
+.db-card-btn-view {
+  background: #2D6A3F !important;
+  border-color: #2D6A3F !important;
+}
+
+.db-card-btn-view .db-card-btn-label {
+  color: #FFFFFF !important;
+}
+
+.db-card-btn-view:hover {
+  background: #0E241C !important;
+  border-color: #0E241C !important;
+}
+
+.db-card-btn-view:hover .db-card-btn-label {
+  color: #D3EFC9 !important;
+}
+
 /* Button label */
 .db-card-btn-label {
-  width: 27px;
-  height: 14px;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  height: auto;
   font-family: 'Inter', system-ui, sans-serif;
   font-style: normal;
   font-weight: 500;
   font-size: 11.2332px;
-  line-height: 14px;
+  line-height: 1;
   color: #0E241C;
   transition: color 0.15s ease;
+  white-space: nowrap;
+  display: inline-block;
+  text-align: center;
   flex: none;
   order: 0;
   flex-grow: 0;
 }
 
-/* Frame 28: Add Paluwagan Card */
+/* Frame 28: Add Ambagan Card */
 .db-card-create {
   box-sizing: border-box;
   width: 164.22px;
@@ -519,7 +711,7 @@
   transform: scale(1.06);
 }
 
-/* View Paluwagan Detail Modal */
+/* View Ambagan Detail Modal */
 .db-detail-overlay {
   position: fixed;
   inset: 0;
@@ -893,3 +1085,111 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .db-logout:hover { border-color: #176B45; color: #176B45; }
+
+/* Card footer: goal on its own line, Contract + Pay share the width evenly */
+.db-card-action {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 12px;
+  height: auto;
+  top: 304px;
+}
+.db-card-action .db-card-price {
+  width: auto;
+  height: auto;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+}
+.db-card-action > div,
+.db-card-btn-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.db-card-action .db-card-btn {
+  margin: 0 !important;
+  flex: 1 1 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 10px !important;
+  gap: 0 !important;
+  border: 0.802374px solid #0E241C !important;
+  border-radius: 80.2374px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  line-height: normal !important;
+}
+.db-card-action .db-card-btn-label {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* View Mode Switcher */
+.db-view-mode-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 24px;
+  padding-bottom: 8px;
+  position: relative;
+  z-index: 25;
+}
+
+.db-view-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 4px;
+  border-radius: 999px;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d3efc9;
+  gap: 4px;
+}
+
+.db-mode-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #5d6146;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.db-mode-btn:hover {
+  color: #1a2e1a;
+  background: #f6faf0;
+}
+
+.db-mode-btn.is-active {
+  background: linear-gradient(90deg, #2d6a3f 0%, #5fad41 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(45, 106, 62, 0.25);
+}

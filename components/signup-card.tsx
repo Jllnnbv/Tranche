@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserRequest } from "@/lib/browser-api";
 import { authErrorText } from "@/lib/auth/client";
+import { triggerPageTransition, stopPageTransition } from "./page-transition";
 import "./signup.css";
 
 export function SignupCard() {
@@ -12,6 +13,28 @@ export function SignupCard() {
   const [agreed, setAgreed] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    browserRequest<{ username: string; email: string }>("/api/auth/me").then(
+      (user) => setCurrentUser(user.username || user.email),
+      () => setCurrentUser(null),
+    );
+  }, []);
+
+  async function logInDemo() {
+    setError(null);
+    setBusy(true);
+    triggerPageTransition();
+    try {
+      await browserRequest("/api/auth/demo", {});
+      window.location.href = "/dashboard";
+    } catch (err) {
+      setError(authErrorText(err));
+      setBusy(false);
+      stopPageTransition();
+    }
+  }
 
   async function signUp(form: HTMLFormElement) {
     const data = new FormData(form);
@@ -21,6 +44,7 @@ export function SignupCard() {
       return;
     }
     setBusy(true);
+    triggerPageTransition();
     try {
       await browserRequest("/api/auth/signup", {
         username: data.get("username"),
@@ -33,6 +57,7 @@ export function SignupCard() {
     } catch (err) {
       setError(authErrorText(err));
       setBusy(false);
+      stopPageTransition();
     }
   }
 
@@ -119,6 +144,13 @@ export function SignupCard() {
             </p>
           </div>
         </header>
+
+        {currentUser && (
+          <div className="su-current-user-banner">
+            Currently signed in as <strong>{currentUser}</strong>.{" "}
+            <Link href="/dashboard">Go to Dashboard &rarr;</Link>
+          </div>
+        )}
 
         {/* Form */}
         <form
@@ -217,7 +249,8 @@ export function SignupCard() {
             <button
               type="button"
               className="su-social"
-              onClick={() => setError("Google sign-up isn't available yet. Sign up with your email.")}
+              disabled={busy}
+              onClick={() => void logInDemo()}
             >
               <div className="su-google-frame" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

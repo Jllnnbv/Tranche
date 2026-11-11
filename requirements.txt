@@ -1,4 +1,4 @@
-# Tranche: setup requirements
+# Ambagan: setup requirements
 #
 # This is a Node.js project, so pip does not read this file. The npm packages are
 # pinned in package.json and pnpm-lock.yaml. Install everything with:
@@ -34,5 +34,5 @@ vitest>=4.1.11
 react-test-renderer==19.3.0
 #
 # ---- Testnet accounts (Friendbot-funded; public G-addresses only, never S-secrets) ----
-# 5 members, landlord, car lender, Tranche Vault (multisig 3-of-5, master weight 0),
+# 5 members, landlord, car lender, Ambagan Vault (multisig 3-of-5, master weight 0),
 # Safety Fund (multisig). Put their public keys in config/group.json and .env.local.

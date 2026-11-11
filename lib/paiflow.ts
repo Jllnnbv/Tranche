@@ -71,7 +71,7 @@ function origin() {
   }
 }
 // Round 1 uses PAIFLOW_DEPLOYMENT_ID/PAIFLOW_API_TOKEN; later rounds come from
-// server-only TRANCHE_ROUNDS_JSON: [{"round":2,"deploymentId":"…","token":"pfk_…"}].
+// server-only AMBAGAN_ROUNDS_JSON (or TRANCHE_ROUNDS_JSON): [{"round":2,"deploymentId":"…","token":"pfk_…"}].
 function roundCredentials(round: number) {
   if (round === 1)
     return {
@@ -79,15 +79,15 @@ function roundCredentials(round: number) {
       deploymentId: process.env.PAIFLOW_DEPLOYMENT_ID?.trim(),
     };
   if (!Number.isSafeInteger(round) || round < 1)
-    return configurationError("Unknown Tranche round.");
+    return configurationError("Unknown Ambagan round.");
   let rounds: unknown;
   try {
-    rounds = JSON.parse(process.env.TRANCHE_ROUNDS_JSON || "[]");
+    rounds = JSON.parse(process.env.AMBAGAN_ROUNDS_JSON || process.env.TRANCHE_ROUNDS_JSON || "[]");
   } catch {
-    return configurationError("Set TRANCHE_ROUNDS_JSON to a JSON array.");
+    return configurationError("Set AMBAGAN_ROUNDS_JSON to a JSON array.");
   }
   if (!Array.isArray(rounds))
-    return configurationError("Set TRANCHE_ROUNDS_JSON to a JSON array.");
+    return configurationError("Set AMBAGAN_ROUNDS_JSON to a JSON array.");
   const entry = rounds.find(
     (r): r is { deploymentId?: unknown; token?: unknown } =>
       !!r && typeof r === "object" && (r as { round?: unknown }).round === round,

@@ -10,10 +10,13 @@ export function SignaturePad({
   onSave,
   onUpload,
   onCancel,
+  onDraw,
 }: {
   onSave: (dataUrl: string) => void;
   onUpload: () => void;
   onCancel: () => void;
+  /** Called after each stroke (and with "" on clear) so the parent can keep the current drawing. */
+  onDraw?: (dataUrl: string) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
@@ -72,14 +75,17 @@ export function SignaturePad({
   };
 
   const end = () => {
+    const wasDrawing = drawing.current;
     drawing.current = false;
     last.current = null;
+    if (wasDrawing && canvasRef.current) onDraw?.(canvasRef.current.toDataURL("image/png"));
   };
 
   const clear = () => {
     const canvas = canvasRef.current;
     canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
     setHasInk(false);
+    onDraw?.("");
   };
 
   return (

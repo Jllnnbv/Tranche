@@ -44,13 +44,16 @@
 }
 .lg-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 8px;
   text-decoration: none;
   font-family: var(--mono), monospace;
   font-weight: 500;
   font-size: 24px;
   color: #045307;
+  text-align: center;
 }
 .lg-head h1 {
   margin: 0;
@@ -174,4 +177,61 @@
   line-height: 16px;
   color: #c43d4b;
 }
+.lg-success {
+  margin: -4px 8px 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: #1f3a19;
+}
+.lg-row-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: -6px;
+}
+.lg-hint {
+  font-size: 11px;
+  line-height: 15px;
+  color: #3b5037;
+  background: #eaf3e3;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid #d4e7cb;
+  display: inline-block;
+}
+.lg-hint code {
+  font-weight: 600;
+  color: #0e241c;
+}
+.lg-toggle-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #5c5959;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  font-style: italic;
+  cursor: pointer;
+}
+.lg-toggle-btn:hover {
+  color: #0e241c;
+}
 .lg-login:disabled { opacity: 0.6; cursor: wait; }
+
+.lg-current-user-banner {
+  margin: -24px 0 24px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: #eaf3e3;
+  border: 1px solid #cce3c1;
+  font-size: 13px;
+  color: #1f3a19;
+  text-align: center;
+}
+.lg-current-user-banner a {
+  color: #176b45;
+  font-weight: 600;
+  text-decoration: underline;
+  margin-left: 4px;
+}
