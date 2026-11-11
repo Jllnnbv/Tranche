@@ -135,6 +135,18 @@ export function LoginCard() {
           <div className="lg-current-user-banner">
             Currently signed in as <strong>{currentUser}</strong>.{" "}
             <Link href="/dashboard">Go to Dashboard &rarr;</Link>
+            <span style={{ margin: "0 8px", opacity: 0.5 }}>•</span>
+            <button
+              type="button"
+              className="lg-toggle-btn"
+              onClick={async () => {
+                await browserRequest("/api/auth/logout", {});
+                setCurrentUser(null);
+                window.location.reload();
+              }}
+            >
+              Log out
+            </button>
           </div>
         )}
 

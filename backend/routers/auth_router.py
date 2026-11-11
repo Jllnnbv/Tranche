@@ -63,11 +63,15 @@ def clear_session_cookie(response: Response, is_secure: bool = False):
         secure=is_secure,
     )
 
+def check_is_secure(request: Request) -> bool:
+    proto = request.headers.get("x-forwarded-proto", "").lower()
+    return request.url.scheme == "https" or proto == "https"
+
 @router.post("/demo")
 async def demo_login(request: Request, response: Response):
     user = get_or_create_demo_user()
     token = create_session_token(user["id"])
-    is_secure = request.url.scheme == "https"
+    is_secure = check_is_secure(request)
     set_session_cookie(response, token, is_secure)
     return {"data": user}
 
@@ -85,7 +89,7 @@ async def login(req: LoginRequest, request: Request, response: Response):
     
     clear_login_failures(email_clean)
     token = create_session_token(user["id"])
-    is_secure = request.url.scheme == "https"
+    is_secure = check_is_secure(request)
     set_session_cookie(response, token, is_secure)
     return {"data": user}
 
@@ -104,13 +108,13 @@ async def signup(req: SignupRequest, request: Request, response: Response):
 
     user = create_user(username, email_clean, req.password, req.phone)
     token = create_session_token(user["id"])
-    is_secure = request.url.scheme == "https"
+    is_secure = check_is_secure(request)
     set_session_cookie(response, token, is_secure)
     return {"data": user}
 
 @router.post("/logout")
 async def logout(request: Request, response: Response):
-    is_secure = request.url.scheme == "https"
+    is_secure = check_is_secure(request)
     clear_session_cookie(response, is_secure)
     return {"data": {"success": True}}
 
